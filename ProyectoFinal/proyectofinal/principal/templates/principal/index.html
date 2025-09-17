@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Inventario</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>Agregar producto</h1>
+
+        <form method="post" enctype="multipart/form-data" class="form">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn">Guardar</button>
+        </form>
+
+        <hr>
+
+        <h2>Productos</h2>
+        <div class="grid">
+            {% for p in productos %}
+                <div class="card">
+                    {% if p.foto %}
+                        <img src="{{ p.foto.url }}" alt="{{ p.nombre }}">
+                    {% else %}
+                        <div class="placeholder">Sin foto</div>
+                    {% endif %}
+                    <div class="card-body">
+                        <h3>{{ p.nombre }}</h3>
+                        <p class="desc">{{ p.descripcion }}</p>
+                        <p class="precio">${{ p.precio }}</p>
+                    </div>
+                </div>
+            {% empty %}
+                <p>No hay productos aún.</p>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

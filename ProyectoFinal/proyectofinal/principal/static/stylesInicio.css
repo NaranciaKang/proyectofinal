@@ -1,0 +1,150 @@
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    color: #333;
+    background-color: #fff;
+}
+
+/* Header */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 50px;
+    background-color: #fff;
+    border-bottom: 1px solid #ddd;
+}
+
+header .logo {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+header nav ul {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+}
+
+header nav a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+}
+
+header .icons a {
+    margin-left: 15px;
+    font-size: 1.2rem;
+    text-decoration: none;
+}
+
+/* Hero */
+.hero {
+    background: url("https://via.placeholder.com/1400x500") no-repeat center/cover;
+    height: 500px;
+    display: flex;
+    align-items: center;
+    color: white;
+    padding-left: 80px;
+}
+
+.hero-content h1 {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+    color: #000;
+}
+
+.hero-content p {
+    margin-bottom: 20px;
+}
+
+.hero-content button {
+    padding: 10px 20px;
+    background-color: #0055a5;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Categories */
+.categories {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 40px;
+}
+
+.category {
+    text-align: center;
+    background: #f9f9f9;
+    border-radius: 10px;
+    padding: 15px;
+    width: 250px;
+}
+
+.category img {
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.category h3 {
+    margin-bottom: 10px;
+}
+
+/* Products */
+.products {
+    padding: 40px;
+    text-align: center;
+}
+
+.products h2 {
+    margin-bottom: 30px;
+}
+
+.product-list {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 25px;
+}
+
+.product {
+    width: 180px;
+    text-align: center;
+}
+
+.product img {
+    width: 100%;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.product span {
+    color: #0055a5;
+    font-weight: bold;
+}
+
+/* Footer */
+footer {
+    background: #0a0a23;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+footer .socials {
+    margin-top: 10px;
+}
+
+footer .socials a {
+    margin: 0 10px;
+    color: white;
+    text-decoration: none;
+}
