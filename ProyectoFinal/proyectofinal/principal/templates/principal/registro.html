@@ -1,0 +1,35 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro</title>
+    <link rel="stylesheet" href="{% static 'styleslogin.css' %}">
+    <link rel="stylesheet" href="{% static 'inicio-sesion.html' %}">
+</head>
+<body>
+    <div class="formulario">
+        <h1>Registro </h1>
+        <form method="post">
+            {% csrf_token %}
+            <div class="username">
+                <input type="text" name="username" required placeholder="Nombre de usuario">
+            </div>
+            <div class="username">
+                <input type="email" name="email" required placeholder="Correo">
+            </div>
+            <div class="username">
+                <input type="password" name="password" required placeholder="Contraseña">
+            </div>
+            <input type="submit" value="Registrar">
+            <div class="registrarse">
+                Ya tengo <a href="{% url 'login' %}">Inicia sesión</a>
+            </div>
+        </form>
+
+    </div>
+</body>
+</html>
+
+
