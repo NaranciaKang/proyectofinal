@@ -1,0 +1,21 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Checkout</title>
+    <link rel="stylesheet" href="{% static 'carrito.css' %}">
+</head>
+<body>
+    <h2>Finalizar Compra</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <label>Dirección:</label>
+        <input type="text" name="direccion" required>
+        <label>Comuna:</label>
+        <input type="text" name="comuna" required>
+        <button type="submit">Comprar</button>
+    </form>
+    <p>Total: ${{ total }}</p>
+</body>
+</html>

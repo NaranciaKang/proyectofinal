@@ -1,0 +1,73 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #f9f9f9;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background: #fff;
+    display: flex;
+    justify-content: space-between;
+    padding: 15px 50px;
+    border-bottom: 1px solid #ddd;
+}
+
+header nav ul {
+    display: flex;
+    list-style: none;
+    gap: 20px;
+}
+
+header nav a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+}
+
+.carrito {
+    display: flex;
+    justify-content: space-between;
+    margin: 40px auto;
+    width: 90%;
+}
+
+.carrito-productos {
+    width: 65%;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.tabla-carrito {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tabla-carrito th, .tabla-carrito td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+
+.producto-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.producto-info img {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+}
+
+.resumen {
+    width: 30%;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    height: fit-content;
+}

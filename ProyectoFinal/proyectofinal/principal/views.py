@@ -1,5 +1,6 @@
-from django.shortcuts import render, redirect
-from .models import Producto
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Producto, Carrito, ItemCarrito
+from django.http import JsonResponse
 from .forms import ProductoForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
@@ -10,6 +11,7 @@ from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
+from django.views.decorators.csrf import csrf_exempt
 
 
 
@@ -100,3 +102,104 @@ def password_reset_request(request):
         form = PasswordResetForm()
 
     return render(request, "principal/password_reset.html", {"form": form})
+
+# ---------------------- CARRITO ----------------------
+
+def obtener_carrito(request):
+    """ Obtiene el carrito actual del usuario logueado (o crea uno). 
+        Si no hay login, se usa un carrito general con id=1 
+    """
+    if request.user.is_authenticated:
+        carrito, _ = Carrito.objects.get_or_create(usuario=request.user)
+    else:
+        carrito, _ = Carrito.objects.get_or_create(id=1)  # carrito global
+    return carrito
+
+
+def agregar_carrito(request):
+    if request.method == "POST":
+        producto_id = request.POST.get("producto_id")
+        producto = get_object_or_404(Producto, id=producto_id)
+        carrito = obtener_carrito(request)
+
+        item, creado = ItemCarrito.objects.get_or_create(carrito=carrito, producto=producto)
+        if not creado:
+            item.cantidad += 1
+            item.save()
+
+        return JsonResponse({"success": True, "nombre": producto.nombre, "cantidad": item.cantidad})
+
+
+def ver_carrito(request):
+    carrito = obtener_carrito(request)
+    items = carrito.items.all()
+    total = sum(item.subtotal() for item in items)
+    return render(request, "principal/carrito.html", {"items": items, "total": total})
+
+
+@csrf_exempt
+def eliminar_item(request):
+    if request.method == "POST":
+        item_id = request.POST.get("item_id")
+        try:
+            item = ItemCarrito.objects.get(id=item_id)
+            item.delete()
+            return JsonResponse({"success": True})
+        except ItemCarrito.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Item no encontrado"})
+    return JsonResponse({"success": False, "error": "Método inválido"})
+
+
+@csrf_exempt
+def actualizar_cantidad(request):
+    if request.method == "POST":
+        item_id = request.POST.get("item_id")
+        nueva_cantidad = int(request.POST.get("cantidad", 1))
+        try:
+            item = ItemCarrito.objects.get(id=item_id)
+            item.cantidad = nueva_cantidad
+            item.save()
+            return JsonResponse({"success": True, "subtotal": item.subtotal()})
+        except ItemCarrito.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Item no encontrado"})
+    return JsonResponse({"success": False, "error": "Método inválido"})
+
+
+def checkout(request):
+    carrito = obtener_carrito(request)
+    items = carrito.items.all()
+    total = sum(item.subtotal() for item in items)
+
+    if request.method == "POST":
+        direccion = request.POST.get("direccion")
+        comuna = request.POST.get("comuna")
+        # Aquí iría el proceso de pago o creación de la orden
+        carrito.items.all().delete()  # Vaciar carrito al finalizar
+        return JsonResponse({"success": True, "mensaje": "Compra realizada con éxito"})
+
+    return render(request, "principal/checkout.html", {"items": items, "total": total})
+
+
+def agregar_al_carrito(request, producto_id):
+    carrito = obtener_carrito(request)
+    producto = get_object_or_404(Producto, id=producto_id)
+
+    item, creado = ItemCarrito.objects.get_or_create(carrito=carrito, producto=producto)
+    if not creado:
+        item.cantidad += 1
+        item.save()
+
+    return redirect('ver_carrito')
+
+
+
+
+
+
+
+
+
+
+
+
+

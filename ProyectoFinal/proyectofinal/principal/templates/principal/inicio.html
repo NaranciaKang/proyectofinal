@@ -24,7 +24,23 @@
     <div class="icons">
         <a href="#"></a>
         <a href="#"><img width="30" height="30" src="https://img.icons8.com/glyph-neue/64/shopping-cart.png" alt="shopping-cart"/></a>
-        <a href="{% url 'login' %}"><img width="30" height="30" src="https://img.icons8.com/ios-filled/50/user.png" alt="user"/></a>
+
+    {% if user.is_authenticated %}
+        <!-- Submenú del usuario -->
+        <div class="user-menu">
+            <img id="userIcon" class="user-icon" width="30" height="30" src="https://img.icons8.com/ios-filled/50/user.png" alt="user"/>
+            <ul id="userDropdown" class="dropdown">
+                <li><a href="#">Perfil</a></li>
+                <li><a href="{% url 'logout' %}">Cerrar sesión</a></li>
+            </ul>
+        </div>
+    {% else %}
+        <!-- Si no hay sesión -->
+        <a href="{% url 'login' %}">
+            <img width="30" height="30" src="https://img.icons8.com/ios-filled/50/user.png" alt="user"/>
+        </a>
+    {% endif %}
+
     </div>
 </header>
 
@@ -107,17 +123,21 @@
                 {% if p.foto %}
                     <img src="{{ p.foto.url }}" alt="{{ p.nombre }}">
                 {% endif %}
-                    <p>{{ p.nombre }}</p>
-                    <span>${{ p.precio }}</span>
+                <p>{{ p.nombre }}</p>
+                <span>${{ p.precio }}</span>
+
+                <!-- Formulario para agregar al carrito -->
+                <form action="{% url 'agregar_al_carrito' p.id %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary btn-sm mt-2">Agregar al carrito</button>
+                </form>
             </div>
-            {% empty %}
-                <p>No hay productos aún.</p>
+        {% empty %}
+            <p>No hay productos aún.</p>
         {% endfor %}
     </div>
-    
-    
-    </div>
 </section>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 
@@ -130,5 +150,6 @@
         <a href="#">Twitter</a>
     </div>
 </footer>
+<script src="{% static 'submenulogin.js' %}"></script>
 </body>
 </html>

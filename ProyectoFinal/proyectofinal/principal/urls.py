@@ -9,6 +9,14 @@ urlpatterns = [
     path('registro/', views.registro, name='registro'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
+    path("agregar-carrito/", views.agregar_carrito, name="agregar_carrito"),
+    path("carrito/", views.ver_carrito, name="ver_carrito"),
+    path("eliminar-item/", views.eliminar_item, name="eliminar_item"),
+    path("actualizar-cantidad/", views.actualizar_cantidad, name="actualizar_cantidad"),
+    path("checkout/", views.checkout, name="checkout"),
+    path("agregar/<int:producto_id>/", views.agregar_al_carrito, name="agregar_al_carrito"),
+
+
 
     # 🔹 Recuperación de contraseña
     path("password-reset/", views.password_reset_request, name="password_reset"),
