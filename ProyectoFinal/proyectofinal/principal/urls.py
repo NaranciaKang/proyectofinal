@@ -4,8 +4,8 @@ from . import views
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
-    path('',views.principal,name='principal'),
-    path('inicio/', views.inicio, name='inicio'),
+    path('',views.inicio,name='inicio'),
+    path('inventario/', views.principal, name='inventario'),
     path('registro/', views.registro, name='registro'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
@@ -15,7 +15,9 @@ urlpatterns = [
     path("actualizar-cantidad/", views.actualizar_cantidad, name="actualizar_cantidad"),
     path("checkout/", views.checkout, name="checkout"),
     path("agregar/<int:producto_id>/", views.agregar_al_carrito, name="agregar_al_carrito"),
-
+    path("wishlist/", views.ver_wishlist, name="ver_wishlist"),
+    path("wishlist/agregar/<int:producto_id>/", views.agregar_wishlist, name="agregar_wishlist"),
+    path("wishlist/eliminar/<int:producto_id>/", views.eliminar_wishlist, name="eliminar_wishlist"),
 
 
     # 🔹 Recuperación de contraseña

@@ -27,3 +27,20 @@ class ItemCarrito(models.Model):
     def subtotal(self):
         return self.cantidad * self.producto.precio
 
+# 🔹 WISHLIST
+class Wishlist(models.Model):
+    usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name="wishlist")
+
+    def __str__(self):
+        return f"Wishlist de {self.usuario.username}"
+
+
+class ItemWishlist(models.Model):
+    wishlist = models.ForeignKey(Wishlist, on_delete=models.CASCADE, related_name="items")
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ("wishlist", "producto")
+
+    def __str__(self):
+        return f"{self.producto.nombre} en wishlist de {self.wishlist.usuario.username}"

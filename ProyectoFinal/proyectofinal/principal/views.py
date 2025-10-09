@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Producto, Carrito, ItemCarrito
+from .models import Producto, Carrito, ItemCarrito, Wishlist, ItemWishlist
 from django.http import JsonResponse
 from .forms import ProductoForm
 from django.contrib.auth import authenticate, login, logout
@@ -12,6 +12,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 
 
 
@@ -33,10 +34,24 @@ def principal(request):
     })
 
 def inicio(request):
-    productos = Producto.objects.all().order_by('-id')[:8]  # últimos 8 productos
+    productos_carrusel = Producto.objects.all().order_by('-id')[:3]  # solo 3 últimos para el carrusel
+    productos_lista = Producto.objects.all().order_by('-id')[:8]     # últimos 8 para la sección de productos
+
+    wishlist_ids = []
+    if request.user.is_authenticated:
+        wishlist = obtener_wishlist(request)
+        wishlist_ids = list(wishlist.items.values_list('producto_id', flat=True))
+
+    # 🔹 Agregamos un atributo 'en_wishlist' a cada producto
+    for p in productos_lista:
+        p.en_wishlist = p.id in wishlist_ids
+
     return render(request, 'principal/inicio.html', {
-        'productos': productos
+        'productos_carrusel': productos_carrusel,
+        'productos_lista': productos_lista,
+        'wishlist_ids': wishlist_ids
     })
+
 
     
 
@@ -181,15 +196,79 @@ def checkout(request):
 
 
 def agregar_al_carrito(request, producto_id):
-    carrito = obtener_carrito(request)
     producto = get_object_or_404(Producto, id=producto_id)
 
+    # Buscar carrito
+    if request.user.is_authenticated:
+        carrito, _ = Carrito.objects.get_or_create(usuario=request.user)
+    else:
+        # Carrito anónimo -> opcional manejar por sesión
+        carrito, _ = Carrito.objects.get_or_create(usuario=None)
+
+    # Agregar producto o aumentar cantidad
     item, creado = ItemCarrito.objects.get_or_create(carrito=carrito, producto=producto)
     if not creado:
         item.cantidad += 1
-        item.save()
+    item.save()
 
-    return redirect('ver_carrito')
+    # 🔹 Si la petición viene de fetch (AJAX), devolvemos JSON
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        return JsonResponse({"success": True, "mensaje": f"{producto.nombre} agregado al carrito"})
+
+    # Si es un submit normal, redirigimos como antes
+    return redirect("ver_carrito")
+
+def obtener_wishlist(request):
+    """Obtiene la wishlist del usuario o la crea."""
+    if not request.user.is_authenticated:
+        return None
+    wishlist, _ = Wishlist.objects.get_or_create(usuario=request.user)
+    return wishlist
+
+
+def agregar_wishlist(request, producto_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"success": False, "error": "Debes iniciar sesión"}, status=403)
+
+    producto = get_object_or_404(Producto, id=producto_id)
+    wishlist, _ = Wishlist.objects.get_or_create(usuario=request.user)
+    item, creado = ItemWishlist.objects.get_or_create(wishlist=wishlist, producto=producto)
+
+    if creado:
+        return JsonResponse({"success": True, "mensaje": f"✅ {producto.nombre} se agregó a tu wishlist."})
+    else:
+        return JsonResponse({"success": False, "mensaje": f"⚠️ {producto.nombre} ya está en tu wishlist."})
+
+def ver_wishlist(request):
+    if not request.user.is_authenticated:
+        return redirect("login")
+
+    wishlist = obtener_wishlist(request)
+    items = wishlist.items.all()
+    return render(request, "principal/wishlist.html", {"items": items})
+
+def eliminar_wishlist(request, producto_id):
+    if not request.user.is_authenticated:
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse({"success": False, "mensaje": "Debes iniciar sesión"})
+        return redirect("login")
+
+    wishlist = obtener_wishlist(request)
+    item = ItemWishlist.objects.filter(wishlist=wishlist, producto_id=producto_id).first()
+
+    if item:
+        item.delete()
+        mensaje = "Producto eliminado de favoritos"
+        success = True
+    else:
+        mensaje = "Producto no encontrado en favoritos"
+        success = False
+
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        return JsonResponse({"success": success, "mensaje": mensaje})
+
+    messages.success(request, mensaje)
+    return redirect("ver_wishlist")
 
 
 

@@ -12,18 +12,18 @@
 <body>
 <!-- Header -->
 <header>
-    <div class="logo">LERIGR</div>
+    <div class="logo">LOGO</div>
     <nav>
     <ul>
         <li><a href="#">Inicio</a></li>
         <li><a href="#">Productos</a></li>
-        <li><a href="#">Favoritos</a></li>
+        <li><a href="{% url 'ver_wishlist' %}">Favoritos</a></li>
         <li><a href="#">Contactanos</a></li>
     </ul>
     </nav>
     <div class="icons">
         <a href="#"></a>
-        <a href="#"><img width="30" height="30" src="https://img.icons8.com/glyph-neue/64/shopping-cart.png" alt="shopping-cart"/></a>
+        <a href="{% url 'ver_carrito' %}"><img width="30" height="30" src="https://img.icons8.com/glyph-neue/64/shopping-cart.png" alt="shopping-cart"/></a>
 
     {% if user.is_authenticated %}
         <!-- Submenú del usuario -->
@@ -45,105 +45,103 @@
 </header>
 
 <!-- Hero -->
-<section class="hero">
-    <div class="hero-content">
-        <h1>Timeless Elegance,<br> Unrivaled Precision</h1>
-        <p>Discover our exquisite collection of watches</p>
-        <button>Shop Now</button>
-    </div>
-</section>
+
 
 <!-- Carrusel -->
-<div id="carouselExampleCaptions" class="carousel slide">
-<div class="carousel-indicators">
-    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1" aria-label="Slide 2"></button>
-    <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2" aria-label="Slide 3"></button>
-</div>
-<div class="carousel-inner">
-    <div class="carousel-item active">
-        <img src="" class="d-block w-100" alt="...">
-        <div class="carousel-caption d-none d-md-block">
-        <h5>First slide label</h5>
-        <p>Some representative placeholder content for the first slide.</p>
-    </div>
-    </div>
-    <div class="carousel-item">
-        <img src="..." class="d-block w-100" alt="...">
-        <div class="carousel-caption d-none d-md-block">
-        <h5>Second slide label</h5>
-        <p>Some representative placeholder content for the second slide.</p>
-    </div>
-    </div>
-    <div class="carousel-item">
-        <img src="..." class="d-block w-100" alt="...">
-        <div class="carousel-caption d-none d-md-block">
-        <h5>Third slide label</h5>
-        <p>Some representative placeholder content for the third slide.</p>
-    </div>
-    </div>
-</div>
-<button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
-    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-    <span class="visually-hidden">Previous</span>
-</button>
-<button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
-    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-    <span class="visually-hidden">Next</span>
-</button>
+<!-- Carrusel de últimos 3 productos -->
+<div id="carouselProductos" class="carousel slide custom-carousel" data-bs-ride="carousel">
+  <div class="carousel-inner">
+
+    {% for p in productos_carrusel %}
+      <div class="carousel-item {% if forloop.first %}active{% endif %}">
+        {% if p.foto %}
+          <img src="{{ p.foto.url }}" class="d-block w-100 carousel-img" alt="{{ p.nombre }}">
+        {% else %}
+          <img src="{% static 'img/default.jpg' %}" class="d-block w-100 carousel-img" alt="{{ p.nombre }}">
+        {% endif %}
+        
+        <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded p-2">
+          <h5>{{ p.nombre }}</h5>
+          <p>${{ p.precio }}</p>
+          <form action="{% url 'agregar_al_carrito' p.id %}" method="POST">
+            {% csrf_token %}
+            <button type="submit" class="btn">Agregar al carrito</button>
+          </form>
+        </div>
+      </div>
+    {% endfor %}
+
+  </div>
+
+  <!-- Controles -->
+  <button class="carousel-control-prev" type="button" data-bs-target="#carouselProductos" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon"></span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#carouselProductos" data-bs-slide="next">
+    <span class="carousel-control-next-icon"></span>
+  </button>
 </div>
 
+
 <!-- Categories -->
-<section class="categories">
-    <div class="category">
-        <img src="https://via.placeholder.com/300x150" alt="Dive Watches">
-        <h3>Dive Watches</h3>
-        <a href="#">View Collection</a>
-    </div>
-    <div class="category">
-        <img src="https://via.placeholder.com/300x150" alt="Dress Watches">
-        <h3>Dress Watches</h3>
-        <a href="#">View Collection</a>
-    </div>
-    <div class="category">
-        <img src="https://via.placeholder.com/300x150" alt="Smartwatches">
-        <h3>Smartwatches</h3>
-        <a href="#">View Collection</a>
-    </div>
-</section>
+
 
 
 
 <!-- Featured Products -->
 <section class="products">
-    <h2>Featured Products</h2>
+    <h2>Productos agregados</h2>
     <div class="product-list">
-        {% for p in productos %}
+        {% for p in productos_lista %}
             <div class="product">
+              <div class="producto-imagen-container">
                 {% if p.foto %}
                     <img src="{{ p.foto.url }}" alt="{{ p.nombre }}">
+                {% else %}
+                    <img src="{% static 'img/default.jpg' %}" alt="{{ p.nombre }}">
                 {% endif %}
-                <p>{{ p.nombre }}</p>
-                <span>${{ p.precio }}</span>
 
-                <!-- Formulario para agregar al carrito -->
-                <form action="{% url 'agregar_al_carrito' p.id %}" method="POST">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-primary btn-sm mt-2">Agregar al carrito</button>
-                </form>
+                {% if user.is_authenticated %}
+                    <button 
+                      type="button"
+                      class="btn-favorite btn-wishlist-toggle"
+                      data-id="{{ p.id }}"
+                      aria-pressed="{{ p.en_wishlist|yesno:'true,false' }}">
+                      ❤️
+                    </button>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn-favorite">
+                        ❤️
+                    </a>
+                {% endif %}
+              </div>
+
+              <p>{{ p.nombre }}</p>
+              <span>${{ p.precio }}</span>
+
+              <form action="{% url 'agregar_al_carrito' p.id %}" method="POST" class="form-agregar-carrito mt-2">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-primary btn-sm">
+                      Agregar al carrito
+                  </button>
+              </form>
             </div>
+
+
         {% empty %}
             <p>No hay productos aún.</p>
         {% endfor %}
     </div>
 </section>
 
+
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 
 <!-- Footer -->
 <footer>
-    <p>About Us | Customer Service | Returns & Shipping</p>
+    <p>Sobre nosotros | Contacto | Locales</p>
     <div class="socials">
         <a href="#">Facebook</a>
         <a href="#">Instagram</a>
@@ -151,5 +149,12 @@
     </div>
 </footer>
 <script src="{% static 'submenulogin.js' %}"></script>
+<script src="{% static 'carritoInicio.js' %}"></script>
+<script src="{% static 'wishlist.js' %}"></script>
+<script src="{% static 'wishlist-toggle.js' %}"></script>
+
+
 </body>
 </html>
+
+

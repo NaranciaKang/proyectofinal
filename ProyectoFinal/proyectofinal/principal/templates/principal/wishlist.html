@@ -1,0 +1,22 @@
+
+{% block content %}
+<h2>Mis Favoritos</h2>
+<div class="product-list">
+    {% for item in items %}
+        <div class="product">
+            {% if item.producto.foto %}
+                <img src="{{ item.producto.foto.url }}" alt="{{ item.producto.nombre }}">
+            {% endif %}
+            <p>{{ item.producto.nombre }}</p>
+            <span>${{ item.producto.precio }}</span>
+
+            <form action="{% url 'eliminar_wishlist' item.producto.id %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+            </form>
+        </div>
+    {% empty %}
+        <p>No tienes productos en favoritos.</p>
+    {% endfor %}
+</div>
+{% endblock %}

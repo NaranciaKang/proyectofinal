@@ -197,3 +197,105 @@ footer .socials a {
 }
 
 
+/* Notificación flotante */
+.notificacion {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #28a745;
+    color: #fff;
+    padding: 12px 16px;
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.25s ease;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+.notificacion.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+.notificacion .ver-carrito {
+    color: #fff;
+    text-decoration: underline;
+    margin-left: 8px;
+}
+
+
+
+
+/* =========================
+Carrusel personalizado
+   ========================= */
+.custom-carousel {
+    margin-bottom: 20px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.carousel-img {
+    max-height: 300px; /* 👈 Ajusta el tamaño de las imágenes */
+    object-fit: cover;
+}
+
+.carousel-caption h5 {
+    font-size: 16px;
+    margin-bottom: 4px;
+}
+
+.carousel-caption p {
+    font-size: 14px;
+    margin-bottom: 6px;
+}
+
+
+.carousel-caption .btn {
+    background: #0066cc;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 14px;
+}
+
+/* Controles del carrusel */
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    background-color: rgba(0,0,0,0.4);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    background-size: 60%;
+}
+
+.product {
+position: relative;
+}
+
+.btn-favorite {
+position: absolute;
+top: 10px;
+right: 10px;
+border: none;
+background: white;
+border-radius: 50%;
+padding: 6px;
+cursor: pointer;
+font-size: 18px;
+box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+transition: transform 0.2s;
+}
+
+.btn-favorite[aria-pressed="true"] {
+background: #ff4d4d;
+color: white;
+}
+
+.btn-favorite:hover {
+transform: scale(1.1);
+}
+
