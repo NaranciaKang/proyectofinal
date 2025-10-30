@@ -139,3 +139,5 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "cronoselegancee@gmail.com"
 EMAIL_HOST_PASSWORD = "veub vfvv brpv mocx"  # NO la de tu Gmail normal
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+

@@ -1,73 +1,290 @@
+/* 🔹 General */
 body {
-    font-family: Arial, sans-serif;
-    background: #f9f9f9;
-    margin: 0;
-    padding: 0;
+background-color: #121212;
+color: #fff;
+font-family: 'Poppins', sans-serif;
+margin: 0;
+padding: 0;
 }
 
-header {
-    background: #fff;
-    display: flex;
-    justify-content: space-between;
-    padding: 15px 50px;
-    border-bottom: 1px solid #ddd;
+/* 🔹 Header */
+.main-header {
+background-color: #2b2b2b;
+padding: 10px 0;
+border-bottom: 1px solid #333;
+height: 80px; /* 🔹 altura fija del header */
+display: flex;
+align-items: center; /* 🔹 centra verticalmente el contenido */
 }
 
-header nav ul {
-    display: flex;
-    list-style: none;
-    gap: 20px;
+.header-content {
+display: flex;
+justify-content: space-between;
+align-items: center;
 }
 
-header nav a {
-    text-decoration: none;
-    color: #333;
-    font-weight: 500;
+.logo {
+color: #FFD700;
+font-weight: bold;
+font-size: 1.3rem;
 }
 
+/* 🔹 Ajuste del logo */
+.logo img {
+width: 55px;    /* ajusta el tamaño a gusto */
+height: auto;   /* mantiene la proporción */
+vertical-align: middle;
+margin-right: 10px; /* espacio entre el logo y el texto */
+}
+
+/* 🔹 Menú */
+nav ul {
+list-style: none;
+display: flex;
+gap: 25px;
+margin: 0;
+padding: 0;
+}
+
+nav ul li a {
+color: #fff;
+text-decoration: none;
+transition: color 0.3s;
+}
+
+nav ul li a:hover,
+nav ul li a.active {
+color: #FFD700;
+}
+
+/* 🔹 Íconos */
+.icons {
+display: flex;
+align-items: center;
+gap: 18px;
+}
+
+.icon-link {
+display: flex;
+align-items: center;
+justify-content: center;
+background: transparent;
+border-radius: 50%;
+width: 38px;
+height: 38px;
+transition: background 0.3s, transform 0.2s;
+}
+
+.icon-link:hover {
+background-color: rgba(255, 215, 0, 0.15);
+transform: scale(1.1);
+}
+
+.icon-link img {
+width: 25px;
+height: 25px;
+}
+
+/* 🔹 Carrito Section */
 .carrito {
-    display: flex;
-    justify-content: space-between;
-    margin: 40px auto;
-    width: 90%;
+display: flex;
+justify-content: space-between;
+margin: 60px auto;
+width: 90%;
+gap: 30px;
 }
 
 .carrito-productos {
-    width: 65%;
-    background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+width: 65%;
+background-color: #1e1e1e;
+padding: 25px;
+border-radius: 15px;
+box-shadow: 0 2px 10px rgba(255, 215, 0, 0.1);
+}
+
+.carrito-productos h2 {
+color: #FFD700;
+text-align: center;
+margin-bottom: 30px;
 }
 
 .tabla-carrito {
-    width: 100%;
-    border-collapse: collapse;
+width: 100%;
+border-collapse: collapse;
 }
 
-.tabla-carrito th, .tabla-carrito td {
-    padding: 12px;
-    border-bottom: 1px solid #ddd;
-    text-align: center;
+.tabla-carrito th {
+color: #FFD700;
+padding-bottom: 15px;
+}
+
+.tabla-carrito td {
+border-bottom: 1px solid #333;
+padding: 15px 10px;
+text-align: center;
 }
 
 .producto-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+display: flex;
+align-items: center;
+gap: 15px;
+text-align: left;
 }
 
 .producto-info img {
-    width: 60px;
-    height: 60px;
-    border-radius: 8px;
+width: 70px;
+height: 70px;
+border-radius: 10px;
+object-fit: cover;
 }
 
+.nombre-producto {
+color: #fff;
+margin: 0;
+font-weight: 600;
+}
+
+.precio-unitario {
+color: #aaa;
+font-size: 0.9rem;
+}
+
+.cantidad {
+width: 60px;
+background: #1c1c1c;
+color: #fff;
+border: 1px solid #555;
+border-radius: 6px;
+text-align: center;
+padding: 5px;
+}
+
+.subtotal {
+color: #FFD700;
+font-weight: bold;
+font-size: 1.1rem;
+}
+
+.btn-eliminar {
+background: transparent;
+border: none;
+cursor: pointer;
+font-size: 1.2rem;
+color: #FF5555;
+transition: transform 0.2s ease;
+}
+
+.btn-eliminar:hover {
+transform: scale(1.2);
+}
+
+/* 🔹 Resumen */
 .resumen {
-    width: 30%;
-    background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    height: fit-content;
+width: 30%;
+background-color: #1e1e1e;
+padding: 25px;
+border-radius: 15px;
+height: fit-content;
+box-shadow: 0 2px 10px rgba(255, 215, 0, 0.1);
+color: #fff;
+}
+
+.resumen h3 {
+color: #FFD700;
+text-align: center;
+margin-bottom: 20px;
+}
+
+.resumen p {
+display: flex;
+justify-content: space-between;
+margin: 10px 0;
+}
+
+.resumen span, .resumen strong {
+color: #FFD700;
+}
+
+.resumen button {
+width: 100%;
+background-color: #FFD700;
+color: #121212;
+border: none;
+border-radius: 8px;
+padding: 10px;
+font-weight: 600;
+cursor: pointer;
+transition: background 0.3s;
+}
+
+.resumen button:hover {
+background-color: #e6c300;
+}
+
+/* 🔹 Footer */
+.footer {
+background-color: #1c1c1c;
+padding: 50px 0 20px;
+margin-top: 80px;
+color: #fff;
+}
+
+.footer-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+gap: 750px;
+}
+
+.footer h4, .footer h5 {
+color: #FFD700;
+}
+
+.footer a {
+color: #fff;
+text-decoration: none;
+}
+
+.footer a:hover {
+color: #FFD700;
+}
+
+.copy {
+text-align: center;
+margin-top: 30px;
+font-size: 0.9rem;
+color: #bbb;
+}
+
+/* 🔹 Dropdown del usuario */
+.user-menu {
+position: relative;
+}
+
+.user-menu .dropdown {
+display: none;
+position: absolute;
+right: 0;
+top: 35px;
+background-color: #2c2c2c;
+border-radius: 8px;
+list-style: none;
+padding: 8px 0;
+min-width: 140px;
+z-index: 10;
+}
+
+.user-menu .dropdown li a {
+display: block;
+padding: 8px 15px;
+color: white;
+text-decoration: none;
+}
+
+.user-menu .dropdown li a:hover {
+background-color: #444;
+}
+
+/* 🔹 Mostrar menú al hacer clic */
+.user-menu.active .dropdown {
+display: block;
 }

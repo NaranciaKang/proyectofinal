@@ -14,10 +14,6 @@ from django.core.mail import send_mail
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
-
-
-
-
 def principal(request):
     if request.method == 'POST':
         form = ProductoForm(request.POST, request.FILES)
@@ -271,14 +267,50 @@ def eliminar_wishlist(request, producto_id):
     return redirect("ver_wishlist")
 
 
+def productos_hombre(request):
+    productos = Producto.objects.filter(categoria='H').order_by('-id')
+
+    wishlist_ids = []
+    if request.user.is_authenticated:
+        wishlist = obtener_wishlist(request)
+        wishlist_ids = list(wishlist.items.values_list('producto_id', flat=True))
+    for p in productos:
+        p.en_wishlist = p.id in wishlist_ids
+
+    return render(request, 'principal/productos_hombre.html', {
+        'productos': productos,
+        'titulo': 'Relojes de Hombre'
+    })
 
 
+def productos_mujer(request):
+    productos = Producto.objects.filter(categoria='M').order_by('-id')
+
+    wishlist_ids = []
+    if request.user.is_authenticated:
+        wishlist = obtener_wishlist(request)
+        wishlist_ids = list(wishlist.items.values_list('producto_id', flat=True))
+    for p in productos:
+        p.en_wishlist = p.id in wishlist_ids
+
+    return render(request, 'principal/productos_mujer.html', {
+        'productos': productos,
+        'titulo': 'Relojes de Mujer'
+    })
 
 
+def productos_todos(request):
+    productos = Producto.objects.all().order_by('-id')
 
+    wishlist_ids = []
+    if request.user.is_authenticated:
+        wishlist = obtener_wishlist(request)
+        wishlist_ids = list(wishlist.items.values_list('producto_id', flat=True))
+    
+    for p in productos:
+        p.en_wishlist = p.id in wishlist_ids
 
-
-
-
-
-
+    return render(request, 'principal/productos_todos.html', {
+        'productos': productos,
+        'titulo': 'Todos los Productos'
+    })

@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import principal
+from .views import principal, productos_todos
 from . import views
 from django.contrib.auth import views as auth_views
 
@@ -18,6 +18,10 @@ urlpatterns = [
     path("wishlist/", views.ver_wishlist, name="ver_wishlist"),
     path("wishlist/agregar/<int:producto_id>/", views.agregar_wishlist, name="agregar_wishlist"),
     path("wishlist/eliminar/<int:producto_id>/", views.eliminar_wishlist, name="eliminar_wishlist"),
+    path("hombre/", views.productos_hombre, name="productos_hombre"),
+    path("mujer/", views.productos_mujer, name="productos_mujer"),
+    path("productos/", views.productos_todos, name="productos_todos"),
+
 
 
     # 🔹 Recuperación de contraseña

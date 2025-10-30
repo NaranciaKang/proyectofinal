@@ -9,7 +9,10 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!productoId) return; // si es link de login, salir
 
             try {
-                const url = marcado ? `/wishlist/eliminar/${productoId}/` : `/wishlist/agregar/${productoId}/`;
+                const url = marcado
+                    ? `/wishlist/eliminar/${productoId}/`
+                    : `/wishlist/agregar/${productoId}/`;
+
                 const response = await fetch(url, {
                     method: "POST",
                     headers: {
@@ -31,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
 
                 if (response.ok && data.success) {
-                    // Toggle del corazón
+                    // Cambiar el icono del corazón
                     if (marcado) {
                         btn.textContent = "🤍";
                         btn.setAttribute("aria-pressed", "false");
@@ -53,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // Función para obtener CSRF
+    // Función para obtener el token CSRF
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== "") {
@@ -69,41 +72,31 @@ document.addEventListener("DOMContentLoaded", () => {
         return cookieValue;
     }
 
-    // Función de notificación pequeña
-    function mostrarNotificacion(msg, tipo = "success") {
-        const containerId = "notificaciones-container";
+    // 🔔 MISMA función de notificación que la del carrito
+    function mostrarNotificacion(msg, tipo = "success", conVerCarrito = false) {
+        const noti = document.createElement("div");
+        noti.className = "notificacion";
+        noti.innerHTML = `<span class="mensaje">${msg}</span>`;
 
-        let container = document.getElementById(containerId);
-        if (!container) {
-            container = document.createElement("div");
-            container.id = containerId;
-            container.style.position = "fixed";
-            container.style.top = "20px";
-            container.style.right = "20px";
-            container.style.zIndex = "9999";
-            container.style.display = "flex";
-            container.style.flexDirection = "column";
-            container.style.gap = "10px";
-            document.body.appendChild(container);
+        // si quieres agregar un botón o link especial, puedes cambiar "Ver carrito" por otro texto
+        if (conVerCarrito) {
+            const a = document.createElement("a");
+            a.href = "/wishlist/";
+            a.innerText = " Ver wishlist";
+            a.className = "ver-carrito";
+            noti.appendChild(a);
         }
 
-        const noti = document.createElement("div");
-        noti.textContent = msg;
-        noti.style.background = tipo === "success" ? "#28a745" : "#dc3545";
-        noti.style.color = "white";
-        noti.style.padding = "8px 12px";
-        noti.style.borderRadius = "5px";
-        noti.style.boxShadow = "0 2px 8px rgba(0,0,0,0.3)";
-        noti.style.minWidth = "180px";
-        noti.style.fontSize = "0.85rem";
-        noti.style.opacity = "0";
-        noti.style.transition = "0.3s";
+        if (tipo === "error") {
+            noti.style.background = "#dc3545";
+        }
 
-        container.appendChild(noti);
-        setTimeout(() => noti.style.opacity = "1", 50);
+        document.body.appendChild(noti);
+        setTimeout(() => noti.classList.add("show"), 50);
+
         setTimeout(() => {
-            noti.style.opacity = "0";
+            noti.classList.remove("show");
             setTimeout(() => noti.remove(), 300);
-        }, 2500);
+        }, 3000);
     }
 });

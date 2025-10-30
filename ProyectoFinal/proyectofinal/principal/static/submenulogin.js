@@ -1,19 +1,21 @@
-document.addEventListener("DOMContentLoaded", function() {
-    const userIcon = document.getElementById("userIcon");
-    const userDropdown = document.getElementById("userDropdown");
+// submenulogin.js
 
-    if (userIcon && userDropdown) {
-        userIcon.addEventListener("click", function(e) {
-            e.stopPropagation(); // evitar que se cierre inmediatamente
-            userDropdown.classList.toggle("show");
+document.addEventListener("DOMContentLoaded", () => {
+    const userIcon = document.getElementById("userIcon");
+    const userMenu = userIcon ? userIcon.closest(".user-menu") : null;
+
+    if (userIcon && userMenu) {
+        // Mostrar / ocultar el dropdown al hacer clic
+        userIcon.addEventListener("click", (e) => {
+            e.preventDefault();
+            userMenu.classList.toggle("active");
         });
 
-        // Cerrar el menú si se hace clic fuera
-        document.addEventListener("click", function(e) {
-            if (!userDropdown.contains(e.target) && e.target !== userIcon) {
-                userDropdown.classList.remove("show")
+        // Cerrar si se hace clic fuera
+        document.addEventListener("click", (e) => {
+            if (!userMenu.contains(e.target)) {
+                userMenu.classList.remove("active");
             }
         });
     }
 });
-

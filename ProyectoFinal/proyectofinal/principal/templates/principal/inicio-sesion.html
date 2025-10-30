@@ -2,35 +2,33 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inicio de sesion</title>
-    <link rel="stylesheet" href="{% static 'registro.html' %}">
-    <link rel="stylesheet" href="{% static 'styleslogin.css' %}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inicio de Sesión | Lerigr Watches</title>
+  <link rel="stylesheet" href="{% static 'styleslogin.css' %}">
 </head>
 <body>
+  <div class="login-container">
     <div class="formulario">
-        <h1>Inicio de sesion</h1>
-        <form method="post">
-            {% csrf_token %}
-            <div class="username">
-                <input type="email" name="email" required placeholder="Correo">
-            </div>
-            <div class="username">
-                <input type="password" name="password" required placeholder="Contraseña">
-            </div>
-            <input type="submit" value="Iniciar">
-            <div class="registrarse">
-                <ul class="link">
-                    <li><a href="{% url 'password_reset' %}">¿Olvidaste tu contraseña?</a></li>
-                    |
-                    <li><a href="{% url 'registro' %}">Crear Cuenta</a></li>
-                </ul>
-                
-            </div>
-        </form>
-
-
+      <h1>INICIAR SESIÓN</h1>
+      <form method="post">
+        {% csrf_token %}
+        <div class="username">
+          <input type="email" name="email" required placeholder="Correo electrónico">
+        </div>
+        <div class="username">
+          <input type="password" name="password" required placeholder="Contraseña">
+        </div>
+        <input type="submit" value="Entrar">
+        <div class="registrarse">
+          <ul class="link">
+            <li><a href="{% url 'password_reset' %}">¿Olvidaste tu contraseña?</a></li>
+            |
+            <li><a href="{% url 'registro' %}">Crear Cuenta</a></li>
+          </ul>
+        </div>
+      </form>
     </div>
+  </div>
 </body>
 </html>
