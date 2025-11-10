@@ -1,0 +1,22 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Redirigiendo a Webpay...</title>
+</head>
+<body>
+    <div style="text-align: center; margin-top: 50px;">
+        <h2>Redirigiendo a Webpay...</h2>
+        <p>Por favor espera, serás redirigido al portal de pago.</p>
+    </div>
+
+    <form id="webpayForm" action="{{ url }}" method="POST">
+        <input type="hidden" name="token_ws" value="{{ token }}">
+    </form>
+
+    <script>
+        document.getElementById('webpayForm').submit();
+    </script>
+</body>
+</html>

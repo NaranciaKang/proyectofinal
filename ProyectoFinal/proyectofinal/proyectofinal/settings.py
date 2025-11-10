@@ -141,3 +141,9 @@ EMAIL_HOST_PASSWORD = "veub vfvv brpv mocx"  # NO la de tu Gmail normal
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
+# Configuración Transbank
+TRANSBANK = {
+    'COMMERCE_CODE': '597055555532',  # Código de comercio de prueba
+    'API_KEY': '579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C',  # API Key de prueba
+    'ENVIRONMENT': 'INTEGRATION'  # 'INTEGRATION' para pruebas, 'PRODUCTION' para producción
+}

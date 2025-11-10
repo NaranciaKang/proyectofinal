@@ -1,61 +1,68 @@
 // productos.js - Funcionalidades para la página de productos
 
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Inicializando sistema de productos...');
+    
+    // Inicializar gestor de productos
+    const productosManager = new ProductosManager();
+    productosManager.init();
+});
+
 class ProductosManager {
     constructor() {
         this.productosGrid = document.getElementById('productosGrid');
         this.filtros = document.querySelectorAll('.btn-filtro');
         this.ordenSelect = document.getElementById('ordenSelect');
         this.contadorProductos = document.querySelector('.contador-productos');
-        this.productos = Array.from(document.querySelectorAll('.producto-card'));
+        this.productos = [];
         
-        this.init();
+        console.log('📍 Elementos encontrados:');
+        console.log('- productosGrid:', this.productosGrid);
+        console.log('- filtros:', this.filtros.length);
+        console.log('- ordenSelect:', this.ordenSelect);
+        console.log('- contadorProductos:', this.contadorProductos);
     }
 
     init() {
-        this.setupEventListeners();
+        this.cargarProductos();
+        this.setupFiltros();
+        this.setupOrdenamiento();
+        this.setupMenuHamburguesa();
         this.setupWishlist();
-        this.updateContador();
+        this.setupCarrito();
     }
 
-    setupEventListeners() {
-        // Filtros por categoría
+    cargarProductos() {
+        this.productos = Array.from(document.querySelectorAll('.producto-card'));
+        console.log('📦 Productos cargados:', this.productos.length);
+        
+        this.productos.forEach((producto, index) => {
+            console.log(`Producto ${index + 1}:`, {
+                nombre: producto.dataset.nombre,
+                categoria: producto.dataset.categoria,
+                precio: producto.dataset.precio,
+                id: producto.dataset.id
+            });
+        });
+    }
+
+    setupFiltros() {
+        console.log('🔧 Configurando filtros...');
+        
         this.filtros.forEach(filtro => {
             filtro.addEventListener('click', (e) => {
-                this.aplicarFiltro(e.target.dataset.filter);
+                e.preventDefault();
+                const filtroSeleccionado = e.currentTarget.dataset.filter;
+                console.log('🎯 Filtro seleccionado:', filtroSeleccionado);
+                this.aplicarFiltro(filtroSeleccionado);
             });
         });
-
-        // Ordenamiento
-        this.ordenSelect.addEventListener('change', (e) => {
-            this.ordenarProductos(e.target.value);
-        });
-
-        // Menú hamburguesa
-        this.setupMenuHamburguesa();
-    }
-
-    setupMenuHamburguesa() {
-        const toggle = document.getElementById('menuToggle');
-        const navList = document.querySelector('.nav-list');
-        
-        if (toggle && navList) {
-            toggle.addEventListener('click', () => {
-                navList.classList.toggle('show');
-                toggle.classList.toggle('active');
-            });
-
-            // Cerrar menú al hacer clic en un enlace
-            document.querySelectorAll('.nav-list a').forEach(link => {
-                link.addEventListener('click', () => {
-                    navList.classList.remove('show');
-                    toggle.classList.remove('active');
-                });
-            });
-        }
     }
 
     aplicarFiltro(filtro) {
-        // Actualizar estado activo de botones
+        console.log('🎛️ Aplicando filtro:', filtro);
+        
+        // Actualizar botones activos
         this.filtros.forEach(btn => {
             btn.classList.remove('active');
             if (btn.dataset.filter === filtro) {
@@ -63,21 +70,37 @@ class ProductosManager {
             }
         });
 
-        let productosVisibles = 0;
+        let visibleCount = 0;
 
         this.productos.forEach(producto => {
-            if (filtro === 'todos' || producto.dataset.categoria === filtro) {
+            const categoria = producto.dataset.categoria;
+            
+            if (filtro === 'todos' || categoria === filtro) {
                 producto.style.display = 'block';
-                productosVisibles++;
+                producto.style.opacity = '1';
+                visibleCount++;
             } else {
                 producto.style.display = 'none';
             }
         });
 
-        this.updateContador(productosVisibles);
+        this.actualizarContador(visibleCount);
+        console.log(`👀 Productos visibles: ${visibleCount}`);
+    }
+
+    setupOrdenamiento() {
+        if (this.ordenSelect) {
+            this.ordenSelect.addEventListener('change', (e) => {
+                const criterio = e.target.value;
+                console.log('📊 Orden seleccionado:', criterio);
+                this.ordenarProductos(criterio);
+            });
+        }
     }
 
     ordenarProductos(criterio) {
+        console.log('🔄 Ordenando productos por:', criterio);
+        
         const productosVisibles = this.productos.filter(p => 
             p.style.display !== 'none'
         );
@@ -96,37 +119,61 @@ class ProductosManager {
             }
         });
 
-        // Reordenar en el DOM
+        // Limpiar y reinsertar productos ordenados
         productosVisibles.forEach(producto => {
             this.productosGrid.appendChild(producto);
         });
+
+        console.log('✅ Productos ordenados');
     }
 
-    updateContador(cantidad = null) {
-        if (cantidad === null) {
-            cantidad = this.productos.length;
+    actualizarContador(cantidad) {
+        if (this.contadorProductos) {
+            this.contadorProductos.textContent = `${cantidad} productos encontrados`;
         }
-        this.contadorProductos.textContent = `${cantidad} productos encontrados`;
+    }
+
+    setupMenuHamburguesa() {
+        const toggle = document.getElementById('menuToggle');
+        const navList = document.querySelector('.nav-list');
+        
+        if (toggle && navList) {
+            toggle.addEventListener('click', () => {
+                navList.classList.toggle('show');
+                toggle.classList.toggle('active');
+            });
+
+            document.querySelectorAll('.nav-list a').forEach(link => {
+                link.addEventListener('click', () => {
+                    navList.classList.remove('show');
+                    toggle.classList.remove('active');
+                });
+            });
+        }
     }
 
     setupWishlist() {
         document.addEventListener('click', (e) => {
-            if (e.target.closest('.btn-wishlist-toggle')) {
-                this.toggleWishlist(e.target.closest('.btn-wishlist-toggle'));
+            const wishlistBtn = e.target.closest('.btn-wishlist-toggle');
+            if (wishlistBtn) {
+                e.preventDefault();
+                this.toggleWishlist(wishlistBtn);
             }
         });
     }
 
-    async toggleWishlist(btnWishlist) {
-        const productoId = btnWishlist.dataset.productoId;
-        
+    async toggleWishlist(btn) {
+        const productoId = btn.dataset.id;
         if (!productoId) return;
 
-        // Feedback visual inmediato
-        btnWishlist.classList.toggle('active');
+        const isActive = btn.getAttribute('aria-pressed') === 'true';
         
         try {
-            const response = await fetch(`/wishlist/agregar/${productoId}/`, {
+            const url = isActive 
+                ? `/wishlist/eliminar/${productoId}/`
+                : `/wishlist/agregar/${productoId}/`;
+
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
@@ -136,22 +183,58 @@ class ProductosManager {
 
             const data = await response.json();
 
-            if (!data.success) {
-                // Revertir cambio visual si falla
-                btnWishlist.classList.toggle('active');
-                
-                if (data.error && data.error.includes('Debes iniciar sesión')) {
-                    window.location.href = '/login/';
-                } else {
-                    this.mostrarMensaje(data.mensaje || 'Error al actualizar wishlist', 'error');
-                }
+            if (data.success) {
+                btn.setAttribute('aria-pressed', !isActive);
+                btn.textContent = !isActive ? '❤️' : '🤍';
+                this.mostrarNotificacion(data.mensaje, 'success');
             } else {
-                this.mostrarMensaje(data.mensaje, 'success');
+                throw new Error(data.mensaje);
             }
         } catch (error) {
-            console.error('Error:', error);
-            btnWishlist.classList.toggle('active');
-            this.mostrarMensaje('Error de conexión', 'error');
+            console.error('Error wishlist:', error);
+            this.mostrarNotificacion('Error al actualizar favoritos', 'error');
+        }
+    }
+
+    setupCarrito() {
+        document.addEventListener('submit', async (e) => {
+            if (e.target.classList.contains('form-agregar-carrito')) {
+                e.preventDefault();
+                await this.agregarAlCarrito(e.target);
+            }
+        });
+    }
+
+    async agregarAlCarrito(form) {
+        const button = form.querySelector('button[type="submit"]');
+        const originalText = button.innerHTML;
+        
+        button.innerHTML = '<span>Agregando...</span>';
+        button.disabled = true;
+        
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: new FormData(form)
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                this.mostrarNotificacion(data.mensaje || 'Producto agregado al carrito', 'success');
+            } else {
+                throw new Error(data.error || 'Error al agregar al carrito');
+            }
+        } catch (error) {
+            console.error('Error carrito:', error);
+            this.mostrarNotificacion('Error al agregar al carrito', 'error');
+        } finally {
+            button.innerHTML = originalText;
+            button.disabled = false;
         }
     }
 
@@ -170,117 +253,28 @@ class ProductosManager {
         return cookieValue;
     }
 
-    mostrarMensaje(mensaje, tipo = 'info') {
-        // Crear elemento de mensaje
-        const mensajeEl = document.createElement('div');
-        mensajeEl.className = `mensaje-flotante mensaje-${tipo}`;
-        mensajeEl.textContent = mensaje;
-        mensajeEl.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 12px 20px;
-            border-radius: 8px;
-            color: white;
-            font-weight: 500;
-            z-index: 10000;
-            animation: slideIn 0.3s ease;
-        `;
-
-        if (tipo === 'success') {
-            mensajeEl.style.background = '#10b981';
-        } else if (tipo === 'error') {
-            mensajeEl.style.background = '#ef4444';
-        } else {
-            mensajeEl.style.background = '#3b82f6';
-        }
-
-        document.body.appendChild(mensajeEl);
-
-        // Remover después de 3 segundos
+    mostrarNotificacion(mensaje, tipo) {
+        const notificacion = document.createElement('div');
+        notificacion.className = `notificacion ${tipo === 'error' ? 'error' : ''}`;
+        notificacion.innerHTML = `<span class="mensaje">${mensaje}</span>`;
+        
+        document.body.appendChild(notificacion);
+        
+        setTimeout(() => notificacion.classList.add('show'), 50);
         setTimeout(() => {
-            mensajeEl.style.animation = 'slideOut 0.3s ease';
-            setTimeout(() => {
-                if (mensajeEl.parentNode) {
-                    mensajeEl.parentNode.removeChild(mensajeEl);
-                }
-            }, 300);
+            notificacion.classList.remove('show');
+            setTimeout(() => notificacion.remove(), 300);
         }, 3000);
     }
 }
 
-// Estilos CSS para animaciones de mensajes
-const estiloMensajes = document.createElement('style');
-estiloMensajes.textContent = `
-    @keyframes slideIn {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-    
-    @keyframes slideOut {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-    }
-`;
-document.head.appendChild(estiloMensajes);
-
-// Inicializar cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', () => {
-    new ProductosManager();
-});
-
-// Manejar envío de formularios de carrito
-document.addEventListener('submit', async (e) => {
-    if (e.target.classList.contains('form-agregar-carrito')) {
-        e.preventDefault();
-        
-        const form = e.target;
-        const button = form.querySelector('button[type="submit"]');
-        const originalText = button.innerHTML;
-        
-        // Feedback visual
-        button.innerHTML = '<span>Agregando...</span>';
-        button.disabled = true;
-        
-        try {
-            const response = await fetch(form.action, {
-                method: 'POST',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value
-                },
-                body: new FormData(form)
-            });
-            
-            const data = await response.json();
-            
-            if (data.success) {
-                // Mostrar mensaje de éxito
-                const mensajeManager = new ProductosManager();
-                mensajeManager.mostrarMensaje(data.mensaje || 'Producto agregado al carrito', 'success');
-            } else {
-                throw new Error(data.error || 'Error al agregar al carrito');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            const mensajeManager = new ProductosManager();
-            mensajeManager.mostrarMensaje('Error al agregar al carrito', 'error');
-        } finally {
-            // Restaurar botón
-            button.innerHTML = originalText;
-            button.disabled = false;
-        }
-    }
-});
+// Fallback para asegurar que se inicialice
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🔄 Fallback: Inicializando desde evento DOMContentLoaded');
+        new ProductosManager().init();
+    });
+} else {
+    console.log('⚡ Fallback: Inicializando inmediatamente (DOM ya listo)');
+    new ProductosManager().init();
+}

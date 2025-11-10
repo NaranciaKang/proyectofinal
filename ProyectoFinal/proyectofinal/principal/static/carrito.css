@@ -287,4 +287,55 @@ background-color: #444;
 /* 🔹 Mostrar menú al hacer clic */
 .user-menu.active .dropdown {
 display: block;
+} 
+
+/* 🔹 Notificaciones del carrito */
+.notificacion-carrito {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    z-index: 1000;
+    display: none;
+    animation: slideIn 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.notificacion-carrito.success {
+    background: #28a745;
+}
+
+.notificacion-carrito.error {
+    background: #dc3545;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* 🔹 Mejoras para el carrito vacío */
+.text-center {
+    text-align: center;
+    padding: 20px;
+    color: #888;
+}
+
+/* 🔹 Botón comprar mejorado */
+.btn-comprar button {
+    transition: all 0.3s ease;
+}
+
+.btn-comprar button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
 }

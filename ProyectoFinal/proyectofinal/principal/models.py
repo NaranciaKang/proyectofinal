@@ -49,4 +49,24 @@ class ItemWishlist(models.Model):
         return f"{self.producto.nombre} en wishlist de {self.wishlist.usuario.username}"
 
 
+#TRANSBANK
+class OrdenCompra(models.Model):
+    ESTADOS = [
+        ('pendiente', 'Pendiente'),
+        ('pagado', 'Pagado'),
+        ('rechazado', 'Rechazado'),
+        ('fallido', 'Fallido'),
+    ]
+    
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    carrito = models.ForeignKey(Carrito, on_delete=models.CASCADE)
+    total = models.DecimalField(max_digits=10, decimal_places=2)
+    direccion = models.TextField()
+    comuna = models.CharField(max_length=100)
+    estado = models.CharField(max_length=20, choices=ESTADOS, default='pendiente')
+    token_transbank = models.CharField(max_length=200, blank=True, null=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_actualizacion = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return f"Orden {self.id} - {self.usuario.username}"

@@ -148,10 +148,6 @@ body {
   z-index: 1002;
 }
 
-.user-menu:hover .dropdown {
-  display: block;
-}
-
 .dropdown li {
   list-style: none;
 }
@@ -850,5 +846,76 @@ body {
         right: 10px;
         padding: 12px 20px;
         font-size: 0.9rem;
+    }
+}
+
+/* ========= DROPDOWN USUARIO ========= */
+.user-menu {
+    position: relative;
+}
+
+.user-menu .dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 45px;
+    background-color: #2c2c2c;
+    border-radius: 8px;
+    list-style: none;
+    padding: 8px 0;
+    min-width: 160px;
+    z-index: 1002;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    border: 1px solid #444;
+    margin: 0;
+}
+
+.user-menu .dropdown li {
+    margin: 0;
+}
+
+.user-menu .dropdown li a {
+    display: block;
+    padding: 10px 20px;
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border: none;
+}
+
+.user-menu .dropdown li a:hover {
+    background-color: #444;
+    color: var(--primary-gold);
+}
+
+/* 🔹 Clase activa cuando el dropdown está abierto (POR CLIC) */
+.user-menu.active .dropdown {
+    display: block;
+}
+
+/* 🔹 Asegurar que el dropdown esté por encima de todo */
+.user-menu .dropdown {
+    z-index: 9999 !important;
+}
+
+/* 🔹 Responsive para dropdown */
+@media (max-width: 768px) {
+    .user-menu .dropdown {
+        right: -10px;
+        top: 40px;
+    }
+}
+
+@media (max-width: 576px) {
+    .user-menu .dropdown {
+        right: -15px;
+        min-width: 140px;
+    }
+    
+    .user-menu .dropdown li a {
+        padding: 8px 15px;
+        font-size: 0.85rem;
     }
 }

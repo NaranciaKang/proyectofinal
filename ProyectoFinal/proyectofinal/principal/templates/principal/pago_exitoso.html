@@ -1,0 +1,102 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pago Exitoso | Cronos Elegance</title>
+    <link rel="stylesheet" href="{% static 'carrito.css' %}">
+</head>
+<body>
+    <!-- Header (mismo que en otras páginas) -->
+    <!-- 🔸 Header -->
+<header class="main-header">
+<div class="container header-content">
+    <!-- 🔹 Logo -->
+    <div class="logo">
+    <span class="logo-icon"><img src="{% static 'imagenes/logo_final2.png' %}" alt="Cronos Elegance"></span>
+    <span class="logo-text">CRONOS ELEGANCE</span>
+    </div>
+
+    <!-- 🔹 Menú principal -->
+    <nav class="main-nav">
+    <ul class="nav-list">
+        <li><a href="{% url 'inicio' %}" class="active">Inicio</a></li>
+        <li><a href="{% url 'productos_todos' %}" class="active">Productos</a></li>
+        <li><a href="#">Sobre Nosotros</a></li>
+        <li><a href="#">Contacto</a></li>
+    </ul>
+    </nav>
+
+    <!-- 🔹 Íconos de usuario -->
+    <div class="icons">
+    <!-- ❤️ Wishlist -->
+    <a href="{% url 'ver_wishlist' %}" class="icon-link" aria-label="Wishlist">
+        <img width="25" src="https://img.icons8.com/ios-glyphs/30/ffffff/like.png" alt="wishlist"/>
+    </a>
+
+    <!-- 🛒 Carrito -->
+    <a href="{% url 'ver_carrito' %}" class="icon-link" aria-label="Carrito">
+        <img width="25" src="https://img.icons8.com/ios-filled/50/ffffff/shopping-cart.png" alt="cart"/>
+    </a>
+
+    <!-- 👤 Usuario -->
+    {% if user.is_authenticated %}
+        <div class="user-menu">
+        <a href="#" id="userIcon" class="icon-link" aria-label="Usuario">
+            <img width="25" src="https://img.icons8.com/ios-filled/50/ffffff/user.png" alt="user"/>
+        </a>
+        <ul id="userDropdown" class="dropdown">
+            <li><a href="#">Perfil</a></li>
+            <li><a href="{% url 'logout' %}">Cerrar sesión</a></li>
+        </ul>
+        </div>
+    {% else %}
+        <a href="{% url 'login' %}" class="icon-link" aria-label="Iniciar sesión">
+        <img width="25" src="https://img.icons8.com/ios-filled/50/ffffff/user.png" alt="login"/>
+        </a>
+    {% endif %}
+    </div>
+
+    <!-- 🔹 Menú hamburguesa -->
+    <div class="menu-toggle" id="menuToggle">
+    <span></span>
+    <span></span>
+    <span></span>
+    </div>
+</div>
+</header>
+
+    <section class="carrito">
+        <div class="carrito-productos" style="text-align: center;">
+            <h2 style="color: #28a745;">¡Pago Exitoso!</h2>
+            <p>Tu pedido ha sido procesado correctamente.</p>
+            <p><strong>Número de orden:</strong> {{ orden.id }}</p>
+            <p><strong>Total pagado:</strong> ${{ orden.total }}</p>
+            <p><strong>Dirección de envío:</strong> {{ orden.direccion }}, {{ orden.comuna }}</p>
+            
+            <div style="margin-top: 30px;">
+                <a href="{% url 'inicio' %}" class="btn-gold">Volver al Inicio</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+    <div class="container footer-grid">
+        <div>
+            <h4>Cronos Elegance</h4>
+            <p>Tu destino para la relojería de lujo.</p>
+        </div>
+        <div>
+            <h5>Contáctanos</h5>
+            <p>Correo: cronoselegancee@gmail.com</p>
+            <p>Tel: +56 9 1234 5678</p>
+        </div>
+    </div>
+    <p class="copy">© 2025 Cronos Elegance. Todos los derechos reservados.</p>
+</footer>
+<script src="{% static 'submenulogin.js' %}"></script>
+<script src="{% static 'carrito.js' %}"></script>
+</body>
+</html>

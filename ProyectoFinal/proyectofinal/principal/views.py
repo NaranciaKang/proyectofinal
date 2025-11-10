@@ -14,6 +14,12 @@ from django.core.mail import send_mail
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
+from transbank.webpay.webpay_plus.transaction import Transaction, WebpayOptions
+from django.conf import settings
+from .models import OrdenCompra
+import uuid
+
+
 def principal(request):
     if request.method == 'POST':
         form = ProductoForm(request.POST, request.FILES)
@@ -177,18 +183,70 @@ def actualizar_cantidad(request):
 
 
 def checkout(request):
+    # Verificar si el usuario está autenticado
+    if not request.user.is_authenticated:
+        messages.error(request, "Debes iniciar sesión para realizar una compra")
+        return redirect('login')
+    
     carrito = obtener_carrito(request)
     items = carrito.items.all()
     total = sum(item.subtotal() for item in items)
-
+    
+    # Verificar que el carrito no esté vacío
+    if not items or total == 0:
+        messages.error(request, "Tu carrito está vacío")
+        return redirect('ver_carrito')
+    
     if request.method == "POST":
         direccion = request.POST.get("direccion")
         comuna = request.POST.get("comuna")
-        # Aquí iría el proceso de pago o creación de la orden
-        carrito.items.all().delete()  # Vaciar carrito al finalizar
-        return JsonResponse({"success": True, "mensaje": "Compra realizada con éxito"})
-
-    return render(request, "principal/checkout.html", {"items": items, "total": total})
+        
+        if not direccion or not comuna:
+            messages.error(request, "Por favor completa todos los campos de envío")
+            return render(request, "principal/checkout.html", {
+                "items": items, 
+                "total": total
+            })
+        
+        # Crear orden de compra
+        orden = OrdenCompra.objects.create(
+            usuario=request.user,
+            carrito=carrito,
+            total=total,
+            direccion=direccion,
+            comuna=comuna,
+            estado='pendiente'
+        )
+        
+        # Crear transacción en Transbank
+        buy_order = f"orden_{orden.id}"
+        session_id = request.session.session_key or str(request.user.id)
+        return_url = request.build_absolute_uri('/webpay/return/')
+        
+        try:
+            response = tx.create(buy_order, session_id, float(total), return_url)
+            
+            # Guardar token en la orden
+            orden.token_transbank = response['token']
+            orden.save()
+            
+            # Redirigir a Transbank
+            return render(request, "principal/redirect_webpay.html", {
+                'token': response['token'],
+                'url': response['url']
+            })
+            
+        except Exception as e:
+            orden.estado = 'fallido'
+            orden.save()
+            messages.error(request, f"Error al procesar el pago: {str(e)}")
+            return redirect("ver_carrito")
+    
+    # GET request - mostrar formulario de checkout
+    return render(request, "principal/checkout.html", {
+        "items": items, 
+        "total": total
+    })
 
 
 def agregar_al_carrito(request, producto_id):
@@ -314,3 +372,114 @@ def productos_todos(request):
         'productos': productos,
         'titulo': 'Todos los Productos'
     })
+
+
+# Configurar Transbank
+commerce_code = settings.TRANSBANK['COMMERCE_CODE']
+api_key = settings.TRANSBANK['API_KEY']
+environment = settings.TRANSBANK['ENVIRONMENT']
+
+tx = Transaction(WebpayOptions(commerce_code, api_key, environment))
+
+def checkout(request):
+    if request.method == "POST":
+        direccion = request.POST.get("direccion")
+        comuna = request.POST.get("comuna")
+        
+        carrito = obtener_carrito(request)
+        items = carrito.items.all()
+        total = sum(item.subtotal() for item in items)
+        
+        if total == 0:
+            messages.error(request, "El carrito está vacío")
+            return redirect("ver_carrito")
+        
+        # Crear orden de compra
+        orden = OrdenCompra.objects.create(
+            usuario=request.user if request.user.is_authenticated else None,
+            carrito=carrito,
+            total=total,
+            direccion=direccion,
+            comuna=comuna,
+            estado='pendiente'
+        )
+        
+        # Crear transacción en Transbank
+        buy_order = f"orden_{orden.id}_{uuid.uuid4().hex[:8]}"
+        session_id = request.session.session_key or str(request.user.id) if request.user.is_authenticated else str(uuid.uuid4())
+        return_url = request.build_absolute_uri('/webpay/return/')
+        
+        try:
+            response = tx.create(buy_order, session_id, float(total), return_url)
+            
+            # Guardar token en la orden
+            orden.token_transbank = response['token']
+            orden.save()
+            
+            # Redirigir a Transbank
+            return render(request, "principal/redirect_webpay.html", {
+                'token': response['token'],
+                'url': response['url']
+            })
+            
+        except Exception as e:
+            orden.estado = 'fallido'
+            orden.save()
+            messages.error(request, f"Error al crear transacción: {str(e)}")
+            return redirect("ver_carrito")
+    
+    # GET request - mostrar formulario de checkout
+    carrito = obtener_carrito(request)
+    items = carrito.items.all()
+    total = sum(item.subtotal() for item in items)
+    
+    return render(request, "principal/checkout.html", {
+        "items": items, 
+        "total": total
+    })
+
+def webpay_return(request):
+    token = request.GET.get('token_ws')
+    
+    if not token:
+        token = request.POST.get('token_ws')
+    
+    if not token:
+        messages.error(request, "Token no recibido")
+        return redirect("ver_carrito")
+    
+    try:
+        # Confirmar transacción
+        response = tx.commit(token)
+        
+        # Buscar la orden por token
+        orden = OrdenCompra.objects.get(token_transbank=token)
+        
+        if response['status'] == 'AUTHORIZED':
+            # Pago exitoso
+            orden.estado = 'pagado'
+            orden.save()
+            
+            # Vaciar carrito
+            orden.carrito.items.all().delete()
+            
+            return render(request, "principal/pago_exitoso.html", {
+                'orden': orden,
+                'response': response
+            })
+        else:
+            # Pago rechazado
+            orden.estado = 'rechazado'
+            orden.save()
+            
+            return render(request, "principal/pago_rechazado.html", {
+                'orden': orden,
+                'response': response
+            })
+            
+    except Exception as e:
+        messages.error(request, f"Error al confirmar pago: {str(e)}")
+        return redirect("ver_carrito")
+
+def webpay_failure(request):
+    return render(request, "principal/pago_fallido.html")

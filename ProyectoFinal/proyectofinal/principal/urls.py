@@ -32,6 +32,11 @@ urlpatterns = [
     path("reset/done/", 
         auth_views.PasswordResetCompleteView.as_view(template_name="principal/password_reset_done.html"), 
         name="password_reset_complete"),
+    
+    #TRANSBANK
+    path("checkout/", views.checkout, name="checkout"),
+    path("webpay/return/", views.webpay_return, name="webpay_return"),
+    path("webpay/failure/", views.webpay_failure, name="webpay_failure"),
 
 ]
 
