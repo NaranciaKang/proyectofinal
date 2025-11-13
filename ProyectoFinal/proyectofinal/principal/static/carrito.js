@@ -10,11 +10,11 @@ document.addEventListener("DOMContentLoaded", () => {
         totalFinal.innerText = "$" + total.toFixed(0);
         
         // Mostrar/ocultar botón de comprar según si hay items
-        const itemsCount = document.querySelectorAll(".tabla-carrito tbody tr").length;
-        const emptyRow = document.querySelector(".tabla-carrito tbody tr td[colspan]");
+        const itemsCount = document.querySelectorAll(".producto-card").length;
+        const carritoVacio = document.querySelector(".carrito-vacio");
         
-        if (itemsCount === 1 && emptyRow) {
-            // Solo hay la fila "carrito vacío"
+        if (itemsCount === 0) {
+            // No hay productos, mostrar carrito vacío
             if (btnComprar) {
                 btnComprar.innerHTML = '<button class="btn btn-secondary" style="width: 100%;" disabled>Carrito Vacío</button>';
             }
@@ -46,7 +46,9 @@ document.addEventListener("DOMContentLoaded", () => {
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    const subtotalElement = input.closest("tr").querySelector(".subtotal");
+                    // Encuentra el elemento subtotal en la misma tarjeta
+                    const productoCard = input.closest(".producto-card");
+                    const subtotalElement = productoCard.querySelector(".subtotal");
                     subtotalElement.innerText = "$" + data.subtotal;
                     actualizarTotal();
                     
@@ -81,9 +83,23 @@ document.addEventListener("DOMContentLoaded", () => {
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    btn.closest("tr").remove();
+                    // Eliminar la tarjeta del producto
+                    const productoCard = btn.closest(".producto-card");
+                    productoCard.remove();
                     actualizarTotal();
                     mostrarNotificacion("✅ Producto eliminado del carrito", "success");
+
+                    // Si no quedan productos, mostrar el mensaje de carrito vacío
+                    if (document.querySelectorAll(".producto-card").length === 0) {
+                        document.querySelector(".lista-productos").innerHTML = `
+                            <div class="carrito-vacio">
+                                <i class="fas fa-shopping-cart"></i>
+                                <h3>Tu carrito está vacío</h3>
+                                <p>Agrega productos para continuar con tu compra</p>
+                                <a href="#" class="btn-seguir-comprando">Seguir Comprando</a>
+                            </div>
+                        `;
+                    }
                 } else {
                     mostrarNotificacion("❌ Error al eliminar producto", "error");
                 }
@@ -92,6 +108,33 @@ document.addEventListener("DOMContentLoaded", () => {
                 console.error("Error:", error);
                 mostrarNotificacion("❌ Error de conexión", "error");
             });
+        });
+    });
+
+    // Funcionalidad para los botones de incremento/decremento
+    document.querySelectorAll(".btn-cantidad.sumar").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const input = btn.parentElement.querySelector(".cantidad");
+            let cantidad = parseInt(input.value) + 1;
+            input.value = cantidad;
+            
+            // Disparar el evento change para actualizar automáticamente
+            const event = new Event('change');
+            input.dispatchEvent(event);
+        });
+    });
+
+    document.querySelectorAll(".btn-cantidad.restar").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const input = btn.parentElement.querySelector(".cantidad");
+            let cantidad = parseInt(input.value) - 1;
+            
+            if (cantidad < 1) cantidad = 1;
+            input.value = cantidad;
+            
+            // Disparar el evento change para actualizar automáticamente
+            const event = new Event('change');
+            input.dispatchEvent(event);
         });
     });
 
@@ -130,4 +173,3 @@ document.addEventListener("DOMContentLoaded", () => {
 
     actualizarTotal();
 });
-

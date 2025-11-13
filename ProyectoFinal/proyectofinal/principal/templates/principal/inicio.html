@@ -28,7 +28,7 @@
     <nav class="main-nav">
       <ul class="nav-list">
         <li><a href="{% url 'inicio' %}" class="active">Inicio</a></li>
-        <li><a href="{% url 'productos_todos' %}" class="active">Productos</a></li>
+        <li><a href="{% url 'productos_todos' %}">Productos</a></li>
         <li><a href="#">Sobre Nosotros</a></li>
         <li><a href="#">Contacto</a></li>
       </ul>
@@ -122,9 +122,11 @@
           <img src="{% static 'img/default.jpg' %}" alt="{{ p.nombre }}">
           {% endif %}
           {% if user.is_authenticated %}
-          <button class="btn-favorite btn-wishlist-toggle" data-id="{{ p.id }}" aria-pressed="{{ p.en_wishlist|yesno:'true,false' }}">❤️</button>
+          <button class="btn-favorite btn-wishlist-toggle" data-id="{{ p.id }}" aria-pressed="{{ p.en_wishlist|yesno:'true,false' }}">
+            {% if p.en_wishlist %}❤️{% else %}🤍{% endif %}
+          </button>
           {% else %}
-          <a href="{% url 'login' %}" class="btn-favorite">❤️</a>
+          <a href="{% url 'login' %}" class="btn-favorite">🤍</a>
           {% endif %}
         </div>
         <h4>{{ p.nombre }}</h4>

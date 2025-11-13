@@ -19,6 +19,8 @@ from django.conf import settings
 from .models import OrdenCompra
 import uuid
 
+from .utils import enviar_boleta_email
+
 
 def principal(request):
     if request.method == 'POST':
@@ -438,6 +440,8 @@ def checkout(request):
         "total": total
     })
 
+
+#modificacion 
 def webpay_return(request):
     token = request.GET.get('token_ws')
     
@@ -460,6 +464,14 @@ def webpay_return(request):
             orden.estado = 'pagado'
             orden.save()
             
+            # 🔹 ENVIAR BOLETA POR EMAIL
+            if orden.usuario and orden.usuario.email:
+                exito_email = enviar_boleta_email(orden)
+                if exito_email:
+                    print("✅ Boleta enviada por email correctamente")
+                else:
+                    print("❌ Error al enviar la boleta por email")
+            
             # Vaciar carrito
             orden.carrito.items.all().delete()
             
@@ -481,5 +493,12 @@ def webpay_return(request):
         messages.error(request, f"Error al confirmar pago: {str(e)}")
         return redirect("ver_carrito")
 
+
+
 def webpay_failure(request):
-    return render(request, "principal/pago_fallido.html")
+    """Vista para cuando el pago falla o es cancelado"""
+    # Puedes agregar algún mensaje contextual si lo necesitas
+    context = {
+        'mensaje': 'El pago fue cancelado o no pudo ser procesado. Por favor, intenta nuevamente.'
+    }
+    return render(request, "principal/pago_rechazado.html", context)

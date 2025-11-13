@@ -2,6 +2,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const botones = document.querySelectorAll(".btn-wishlist-toggle");
 
     botones.forEach(btn => {
+        // Establecer el icono inicial basado en el estado
+        const marcado = btn.getAttribute("aria-pressed") === "true";
+        btn.textContent = marcado ? "❤️" : "🤍";
+
         btn.addEventListener("click", async () => {
             const productoId = btn.getAttribute("data-id");
             const marcado = btn.getAttribute("aria-pressed") === "true";
@@ -36,11 +40,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (response.ok && data.success) {
                     // Cambiar el icono del corazón
                     if (marcado) {
-                        btn.textContent = "🤍";
+                        btn.textContent = "🤍"; // Corazón blanco
                         btn.setAttribute("aria-pressed", "false");
                         mostrarNotificacion(`❌ ${data.mensaje}`, "error");
                     } else {
-                        btn.textContent = "❤️";
+                        btn.textContent = "❤️"; // Corazón rojo
                         btn.setAttribute("aria-pressed", "true");
                         mostrarNotificacion(`✅ ${data.mensaje}`, "success");
                     }
@@ -72,7 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return cookieValue;
     }
 
-    // 🔔 MISMA función de notificación que la del carrito
+    // 🔔 Función de notificación
     function mostrarNotificacion(msg, tipo = "success", conVerCarrito = false) {
         const noti = document.createElement("div");
         noti.className = "notificacion";

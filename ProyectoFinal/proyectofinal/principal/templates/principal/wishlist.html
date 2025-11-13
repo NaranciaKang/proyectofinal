@@ -5,86 +5,128 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mis Favoritos | Cronos Elegance</title>
+    <link rel="stylesheet" href="{% static 'stylesInicio.css' %}">
     <link rel="stylesheet" href="{% static 'wishlist.css' %}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
+
+<!-- 🔸 Top Bar -->
+<div class="top-bar">
+  Envío gratuito en todos los pedidos
+</div>
 
 <!-- 🔸 Header -->
 <header class="main-header">
     <div class="container header-content">
         <!-- 🔹 Logo -->
         <div class="logo">
-            <span class="logo-icon"><img src="{% static 'imagenes/logo_final2.png' %}" alt=""></span> CRONOS ELEGANCE
+            <span class="logo-icon"><img src="{% static 'imagenes/logo_final2.png' %}" alt="Cronos Elegance"></span>
+            <span class="logo-text">CRONOS ELEGANCE</span>
         </div>
 
         <!-- 🔹 Menú principal -->
-        <nav>
-            <ul>
-                <li><a href="{% url 'inicio' %}" class="active">Inicio</a></li>
-                <li><a href="#">Ofertas</a></li>
+        <nav class="main-nav">
+            <ul class="nav-list">
+                <li><a href="{% url 'inicio' %}">Inicio</a></li>
+                <li><a href="{% url 'productos_todos' %}">Productos</a></li>
                 <li><a href="#">Sobre Nosotros</a></li>
                 <li><a href="#">Contacto</a></li>
             </ul>
         </nav>
 
-        <!-- 🔹 Íconos -->
+        <!-- 🔹 Íconos de usuario -->
         <div class="icons">
             <!-- ❤️ Wishlist -->
-            <a href="{% url 'ver_wishlist' %}" class="icon-link" title="Favoritos">
-                <img src="https://img.icons8.com/ios-glyphs/30/ffffff/like.png" alt="wishlist" width="25">
+            <a href="{% url 'ver_wishlist' %}" class="icon-link active" aria-label="Wishlist">
+                <img width="25" src="https://img.icons8.com/ios-glyphs/30/ffffff/like.png" alt="wishlist"/>
             </a>
 
             <!-- 🛒 Carrito -->
-            <a href="{% url 'ver_carrito' %}" class="icon-link" title="Carrito">
-                <img src="https://img.icons8.com/ios-filled/50/ffffff/shopping-cart.png" alt="carrito" width="25">
+            <a href="{% url 'ver_carrito' %}" class="icon-link" aria-label="Carrito">
+                <img width="25" src="https://img.icons8.com/ios-filled/50/ffffff/shopping-cart.png" alt="cart"/>
             </a>
 
             <!-- 👤 Usuario -->
             {% if user.is_authenticated %}
-            <div class="user-menu">
-                <a href="#" id="userIcon" class="icon-link" title="Mi cuenta">
-                    <img src="https://img.icons8.com/ios-filled/50/ffffff/user.png" alt="user" width="25">
-                </a>
-                <ul id="userDropdown" class="dropdown">
-                    <li><a href="#">Perfil</a></li>
-                    <li><a href="{% url 'logout' %}">Cerrar sesión</a></li>
-                </ul>
-            </div>
+                <div class="user-menu">
+                    <a href="#" id="userIcon" class="icon-link" aria-label="Usuario">
+                        <img width="25" src="https://img.icons8.com/ios-filled/50/ffffff/user.png" alt="user"/>
+                    </a>
+                    <ul id="userDropdown" class="dropdown">
+                        <li><a href="#">Perfil</a></li>
+                        <li><a href="{% url 'logout' %}">Cerrar sesión</a></li>
+                    </ul>
+                </div>
             {% else %}
-            <a href="{% url 'login' %}" class="icon-link" title="Iniciar sesión">
-                <img src="https://img.icons8.com/ios-filled/50/ffffff/user.png" alt="login" width="25">
-            </a>
+                <a href="{% url 'login' %}" class="icon-link" aria-label="Iniciar sesión">
+                    <img width="25" src="https://img.icons8.com/ios-filled/50/ffffff/user.png" alt="login"/>
+                </a>
             {% endif %}
+        </div>
+
+        <!-- 🔹 Menú hamburguesa -->
+        <div class="menu-toggle" id="menuToggle">
+            <span></span>
+            <span></span>
+            <span></span>
         </div>
     </div>
 </header>
 
-<!-- 🔸 Wishlist -->
+<!-- 🔸 Wishlist Section -->
 <section class="wishlist-section">
     <div class="container">
-        <h2>Mis Favoritos</h2>
+        <div class="wishlist-header">
+            <h1>Mis Favoritos</h1>
+            <p class="wishlist-count">{{ items|length }} productos en favoritos</p>
+        </div>
+
         <div class="wishlist-grid">
             {% for item in items %}
             <div class="wishlist-card">
-                <div class="img-container">
+                <div class="wishlist-img-container">
                     {% if item.producto.foto %}
                         <img src="{{ item.producto.foto.url }}" alt="{{ item.producto.nombre }}">
                     {% else %}
                         <img src="{% static 'img/default.jpg' %}" alt="{{ item.producto.nombre }}">
                     {% endif %}
+                    
+                    <!-- 🔹 Badge de Categoría -->
+                    <span class="categoria-badge {% if item.producto.categoria == 'H' %}hombre{% else %}mujer{% endif %}">
+                        {{ item.producto.get_categoria_display }}
+                    </span>
+
+                    <!-- 🔹 Corazón en rojo (ya está en favoritos) -->
+                    <button class="btn-favorite" aria-pressed="true">
+                        ❤️
+                    </button>
                 </div>
+
                 <div class="wishlist-info">
-                    <h4>{{ item.producto.nombre }}</h4>
-                    <p class="precio">${{ item.producto.precio }}</p>
-                    <form action="{% url 'eliminar_wishlist' item.producto.id %}" method="POST">
-                        {% csrf_token %}
-                        <button type="submit" class="btn-remove">Eliminar</button>
-                    </form>
+                    <h3>{{ item.producto.nombre }}</h3>
+                    <p class="wishlist-precio">${{ item.producto.precio }}</p>
+                    
+                    <div class="wishlist-actions">
+                        <form action="{% url 'agregar_al_carrito' item.producto.id %}" method="POST">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-agregar">Agregar al Carrito</button>
+                        </form>
+                        <form action="{% url 'eliminar_wishlist' item.producto.id %}" method="POST">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-eliminar">Eliminar</button>
+                        </form>
+                    </div>
                 </div>
             </div>
             {% empty %}
-            <p class="vacio">No tienes productos en favoritos.</p>
+            <div class="wishlist-empty">
+                <div class="empty-content">
+                    <h3>No tienes productos en favoritos</h3>
+                    <p>Descubre nuestra colección y agrega tus productos favoritos</p>
+                    <a href="{% url 'productos_todos' %}" class="btn-descubrir">Descubrir Productos</a>
+                </div>
+            </div>
             {% endfor %}
         </div>
     </div>
@@ -93,11 +135,11 @@
 <!-- 🔸 Footer -->
 <footer class="footer">
     <div class="container footer-grid">
-        <div>
+        <div class="footer-section">
             <h4>Cronos Elegance</h4>
             <p>Tu destino para la relojería de lujo.</p>
         </div>
-        <div>
+        <div class="footer-section">
             <h5>Contáctanos</h5>
             <p>Correo: cronoselegancee@gmail.com</p>
             <p>Tel: +56 9 1234 5678</p>
@@ -106,6 +148,9 @@
     <p class="copy">© 2025 Cronos Elegance. Todos los derechos reservados.</p>
 </footer>
 
+<!-- 🔹 Scripts -->
+<script src="{% static 'wishlist.js' %}"></script>
 <script src="{% static 'submenulogin.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

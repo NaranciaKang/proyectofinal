@@ -5,93 +5,113 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pago Rechazado | Cronos Elegance</title>
-    <link rel="stylesheet" href="{% static 'carrito.css' %}">
+    <link rel="stylesheet" href="{% static 'pago-rechazado.css' %}">
 </head>
 <body>
-    <!-- 🔸 Header -->
+    <!-- Header -->
     <header class="main-header">
-<div class="container header-content">
-    <!-- 🔹 Logo -->
-    <div class="logo">
-    <span class="logo-icon"><img src="{% static 'imagenes/logo_final2.png' %}" alt="Cronos Elegance"></span>
-    <span class="logo-text">CRONOS ELEGANCE</span>
-    </div>
+        <div class="container header-content">
+            <!-- Logo -->
+            <div class="logo">
+                <span class="logo-icon"><img src="{% static 'imagenes/logo_final2.png' %}" alt="Cronos Elegance"></span>
+                <span class="logo-text">CRONOS ELEGANCE</span>
+            </div>
 
-    <!-- 🔹 Menú principal -->
-    <nav class="main-nav">
-    <ul class="nav-list">
-        <li><a href="{% url 'inicio' %}" class="active">Inicio</a></li>
-        <li><a href="{% url 'productos_todos' %}" class="active">Productos</a></li>
-        <li><a href="#">Sobre Nosotros</a></li>
-        <li><a href="#">Contacto</a></li>
-    </ul>
-    </nav>
+            <!-- Menú principal -->
+            <nav class="main-nav">
+                <ul class="nav-list">
+                    <li><a href="{% url 'inicio' %}" class="active">Inicio</a></li>
+                    <li><a href="{% url 'productos_todos' %}" class="active">Productos</a></li>
+                    <li><a href="#">Sobre Nosotros</a></li>
+                    <li><a href="#">Contacto</a></li>
+                </ul>
+            </nav>
 
-    <!-- 🔹 Íconos de usuario -->
-    <div class="icons">
-    <!-- ❤️ Wishlist -->
-    <a href="{% url 'ver_wishlist' %}" class="icon-link" aria-label="Wishlist">
-        <img width="25" src="https://img.icons8.com/ios-glyphs/30/ffffff/like.png" alt="wishlist"/>
-    </a>
+            <!-- Íconos de usuario -->
+            <div class="icons">
+                <!-- ❤️ Wishlist -->
+                <a href="{% url 'ver_wishlist' %}" class="icon-link" aria-label="Wishlist">
+                    <img width="25" src="https://img.icons8.com/ios-glyphs/30/ffffff/like.png" alt="wishlist"/>
+                </a>
 
-    <!-- 🛒 Carrito -->
-    <a href="{% url 'ver_carrito' %}" class="icon-link" aria-label="Carrito">
-        <img width="25" src="https://img.icons8.com/ios-filled/50/ffffff/shopping-cart.png" alt="cart"/>
-    </a>
+                <!-- 🛒 Carrito -->
+                <a href="{% url 'ver_carrito' %}" class="icon-link" aria-label="Carrito">
+                    <img width="25" src="https://img.icons8.com/ios-filled/50/ffffff/shopping-cart.png" alt="cart"/>
+                </a>
 
-    <!-- 👤 Usuario -->
-    {% if user.is_authenticated %}
-        <div class="user-menu">
-        <a href="#" id="userIcon" class="icon-link" aria-label="Usuario">
-            <img width="25" src="https://img.icons8.com/ios-filled/50/ffffff/user.png" alt="user"/>
-        </a>
-        <ul id="userDropdown" class="dropdown">
-            <li><a href="#">Perfil</a></li>
-            <li><a href="{% url 'logout' %}">Cerrar sesión</a></li>
-        </ul>
+                <!-- 👤 Usuario -->
+                {% if user.is_authenticated %}
+                    <div class="user-menu">
+                        <a href="#" id="userIcon" class="icon-link" aria-label="Usuario">
+                            <img width="25" src="https://img.icons8.com/ios-filled/50/ffffff/user.png" alt="user"/>
+                        </a>
+                        <ul id="userDropdown" class="dropdown">
+                            <li><a href="#">Perfil</a></li>
+                            <li><a href="{% url 'logout' %}">Cerrar sesión</a></li>
+                        </ul>
+                    </div>
+                {% else %}
+                    <a href="{% url 'login' %}" class="icon-link" aria-label="Iniciar sesión">
+                        <img width="25" src="https://img.icons8.com/ios-filled/50/ffffff/user.png" alt="login"/>
+                    </a>
+                {% endif %}
+            </div>
+
+            <!-- Menú hamburguesa -->
+            <div class="menu-toggle" id="menuToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
         </div>
-    {% else %}
-        <a href="{% url 'login' %}" class="icon-link" aria-label="Iniciar sesión">
-        <img width="25" src="https://img.icons8.com/ios-filled/50/ffffff/user.png" alt="login"/>
-        </a>
-    {% endif %}
-    </div>
-
-    <!-- 🔹 Menú hamburguesa -->
-    <div class="menu-toggle" id="menuToggle">
-    <span></span>
-    <span></span>
-    <span></span>
-    </div>
-</div>
-</header>
+    </header>
 
     <section class="carrito">
-        <div class="carrito-productos" style="text-align: center;">
-            <h2 style="color: #dc3545;">Pago Rechazado</h2>
-            <p>Lo sentimos, tu pago no pudo ser procesado.</p>
-            <p>Por favor, intenta nuevamente o contacta con tu banco.</p>
+        <div class="error-container">
+            <div class="error-icon">❌</div>
+            <h2 class="error-title">¡Pago Rechazado!</h2>
+            <p class="error-message">Lo sentimos, tu pago no pudo ser procesado correctamente.</p>
             
-            <div style="margin-top: 30px;">
+            <div class="error-notice">
+                <h4 class="error-notice-title">Problema detectado</h4>
+                <p>El proceso de pago ha sido <strong>rechazado</strong> por el sistema.</p>
+                <p class="error-warning">Por favor, intenta nuevamente o contacta con tu entidad bancaria.</p>
+            </div>
+            
+            <div class="error-details">
+                <h3 class="error-details-title">Recomendaciones</h3>
+                <div class="error-info">
+                    <p><strong>Verifica los datos:</strong> Revisa la información de tu tarjeta</p>
+                    <p><strong>Saldo suficiente:</strong> Confirma que tienes fondos disponibles</p>
+                    <p><strong>Límites de compra:</strong> Verifica los límites de tu tarjeta</p>
+                    <p><strong>Contacta a tu banco:</strong> Ellos pueden indicarte el motivo específico</p>
+                    <p><strong>Estado:</strong> <span class="status-rejected">Rechazado</span></p>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
                 <a href="{% url 'ver_carrito' %}" class="btn-gold">Volver al Carrito</a>
                 <a href="{% url 'inicio' %}" class="btn-gold">Volver al Inicio</a>
             </div>
         </div>
     </section>
 
+    <!-- Footer -->
     <footer class="footer">
-    <div class="container footer-grid">
-        <div>
-            <h4>Cronos Elegance</h4>
-            <p>Tu destino para la relojería de lujo.</p>
+        <div class="container footer-grid">
+            <div>
+                <h4>Cronos Elegance</h4>
+                <p>Tu destino para la relojería de lujo.</p>
+            </div>
+            <div>
+                <h5>Contáctanos</h5>
+                <p>Correo: cronoselegancee@gmail.com</p>
+                <p>Tel: +56 9 1234 5678</p>
+            </div>
         </div>
-        <div>
-            <h5>Contáctanos</h5>
-            <p>Correo: cronoselegancee@gmail.com</p>
-            <p>Tel: +56 9 1234 5678</p>
-        </div>
-    </div>
-    <p class="copy">© 2025 Cronos Elegance. Todos los derechos reservados.</p>
-</footer>
+        <p class="copy">© 2025 Cronos Elegance. Todos los derechos reservados.</p>
+    </footer>
+
+    <script src="{% static 'submenulogin.js' %}"></script>
 </body>
 </html>

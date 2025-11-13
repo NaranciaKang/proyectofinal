@@ -156,6 +156,9 @@ nav a.active {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   text-align: center;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 380px; /* Altura fija para todas las tarjetas */
 }
 
 .product-card:hover {
@@ -165,12 +168,15 @@ nav a.active {
 
 .img-container {
   position: relative;
+  height: 200px; /* Altura fija para el contenedor de imagen */
+  overflow: hidden;
 }
 
 .img-container img {
   width: 100%;
+  height: 100%;
   border-radius: 10px 10px 0 0;
-  object-fit: cover;
+  object-fit: cover; /* Asegura que la imagen cubra el contenedor sin distorsión */
 }
 
 .btn-favorite {
@@ -199,6 +205,11 @@ nav a.active {
   font-size: 1rem;
   font-weight: 500;
   color: #1a1a1a;
+  min-height: 40px; /* Altura mínima para nombres de productos */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
 }
 
 .precio {
@@ -206,6 +217,11 @@ nav a.active {
   font-weight: 600;
   margin: 6px 0 10px;
   font-size: 1.1rem;
+}
+
+.form-agregar-carrito {
+  margin-top: auto; /* Empuja el botón hacia la parte inferior */
+  padding: 0 10px 12px; /* Espaciado consistente */
 }
 
 .btn-gold-sm {
@@ -217,12 +233,7 @@ nav a.active {
   cursor: pointer;
   transition: 0.3s;
   font-weight: 600;
-  margin-bottom: 12px;
-}
-
-.btn-gold-sm:hover {
-  background: #b58d2b;
-  color: white;
+  width: 100%; /* Botón de ancho completo */
 }
 
 /* ========= FOOTER ========= */
