@@ -21,6 +21,7 @@ urlpatterns = [
     path("hombre/", views.productos_hombre, name="productos_hombre"),
     path("mujer/", views.productos_mujer, name="productos_mujer"),
     path("productos/", views.productos_todos, name="productos_todos"),
+    path("contacto/", views.contacto, name="contacto"),
 
 
 

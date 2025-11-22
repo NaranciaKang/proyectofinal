@@ -502,3 +502,19 @@ def webpay_failure(request):
         'mensaje': 'El pago fue cancelado o no pudo ser procesado. Por favor, intenta nuevamente.'
     }
     return render(request, "principal/pago_rechazado.html", context)
+
+# Contacto
+def contacto(request):
+    if request.method == 'POST':
+        nombre = request.POST.get('nombre')
+        email = request.POST.get('email')
+        mensaje = request.POST.get('mensaje')
+        
+        # Aquí puedes procesar el mensaje (guardar en BD, enviar email, etc.)
+        print(f"Mensaje de {nombre} ({email}): {mensaje}")
+        
+        # Por ahora solo redirigimos con un mensaje de éxito
+        messages.success(request, "¡Mensaje enviado correctamente! Te contactaremos pronto.")
+        return redirect('contacto')
+    
+    return render(request, 'principal/contacto.html')

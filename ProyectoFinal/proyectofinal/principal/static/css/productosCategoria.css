@@ -1,0 +1,272 @@
+/* ========= RESET ========= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: #f4f4f4; /* gris claro */
+  color: #1a1a1a;
+}
+
+/* ========= TOP BAR ========= */
+.top-bar {
+  background-color: #1a1a1a;
+  color: #d4af37;
+  text-align: center;
+  padding: 8px 0;
+  font-size: 14px;
+}
+
+/* ========= HEADER ========= */
+.main-header {
+  background-color: #2b2b2b;
+  padding: 10px 0;
+  border-bottom: 1px solid #333;
+  height: 80px; /* 🔹 altura fija del header */
+  display: flex;
+  align-items: center; /* 🔹 centra verticalmente el contenido */
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 85%;
+  margin: auto;
+}
+
+.logo {
+  font-weight: bold;
+  font-size: 1.4rem;
+  color: #d4af37;
+}
+
+/* 🔹 Ajuste del logo */
+.logo img {
+  width: 55px;    /* ajusta el tamaño a gusto */
+  height: auto;   /* mantiene la proporción */
+  vertical-align: middle;
+  margin-right: 10px; /* espacio entre el logo y el texto */
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+}
+
+nav a {
+  text-decoration: none;
+  color: white;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+nav a:hover,
+nav a.active {
+  color: #d4af37;
+}
+
+/* ========= ICONOS ========= */
+.icons {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.icon-link img {
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.icon-link img:hover {
+  transform: scale(1.15);
+}
+
+/* ========= MENÚ USUARIO ========= */
+.user-menu {
+  position: relative;
+}
+
+.user-menu .dropdown {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 35px;
+  background-color: #2c2c2c;
+  border-radius: 8px;
+  list-style: none;
+  padding: 8px 0;
+  min-width: 140px;
+  z-index: 10;
+}
+
+.user-menu .dropdown li a {
+  display: block;
+  padding: 8px 15px;
+  color: white;
+  text-decoration: none;
+}
+
+.user-menu .dropdown li a:hover {
+  background-color: #444;
+}
+
+.user-menu.active .dropdown {
+  display: block;
+}
+
+/* ========= SECCIÓN CATEGORÍA ========= */
+.categoria {
+  text-align: center;
+  padding: 60px 0 40px;
+  background-color: #f4f4f4;
+}
+
+.categoria h2 {
+  color: #1a1a1a;
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  border-bottom: 3px solid #d4af37;
+  display: inline-block;
+  padding-bottom: 8px;
+}
+
+/* ========= GRID DE PRODUCTOS ========= */
+.product-grid {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 30px;
+  padding: 0 40px 60px;
+}
+
+/* ========= TARJETA DE PRODUCTO ========= */
+.product-card {
+  background: white;
+  border-radius: 10px;
+  width: 230px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  text-align: center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 380px; /* Altura fija para todas las tarjetas */
+}
+
+.product-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+}
+
+.img-container {
+  position: relative;
+  height: 200px; /* Altura fija para el contenedor de imagen */
+  overflow: hidden;
+}
+
+.img-container img {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px 10px 0 0;
+  object-fit: cover; /* Asegura que la imagen cubra el contenedor sin distorsión */
+}
+
+.btn-favorite {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  border: none;
+  background: white;
+  border-radius: 50%;
+  padding: 6px;
+  cursor: pointer;
+  font-size: 18px;
+  color: #d4af37;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  transition: transform 0.2s, background 0.3s;
+}
+
+.btn-favorite:hover {
+  background: #d4af37;
+  color: white;
+  transform: scale(1.1);
+}
+
+.product-card h4 {
+  margin-top: 12px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #1a1a1a;
+  min-height: 40px; /* Altura mínima para nombres de productos */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+}
+
+.precio {
+  color: #d4af37;
+  font-weight: 600;
+  margin: 6px 0 10px;
+  font-size: 1.1rem;
+}
+
+.form-agregar-carrito {
+  margin-top: auto; /* Empuja el botón hacia la parte inferior */
+  padding: 0 10px 12px; /* Espaciado consistente */
+}
+
+.btn-gold-sm {
+  background: #d4af37;
+  border: none;
+  color: #1a1a1a;
+  padding: 8px 18px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: 0.3s;
+  font-weight: 600;
+  width: 100%; /* Botón de ancho completo */
+}
+
+/* ========= FOOTER ========= */
+.footer {
+  background: #1a1a1a;
+  color: #ddd;
+  padding: 50px 20px;
+}
+
+.footer-grid {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 30px;
+}
+
+.footer h4, .footer h5 {
+  color: #d4af37;
+}
+
+.footer a {
+  color: #ddd;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  color: #d4af37;
+}
+
+.copy {
+  text-align: center;
+  margin-top: 20px;
+  border-top: 1px solid #333;
+  padding-top: 10px;
+  color: #aaa;
+}

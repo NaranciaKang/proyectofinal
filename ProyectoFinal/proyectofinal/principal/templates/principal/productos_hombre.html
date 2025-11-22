@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Relojes de Hombre | Cronos Elegance</title>
-  <link rel="stylesheet" href="{% static 'productosCategoria.css' %}">
+  <link rel="stylesheet" href="{% static 'css/productosCategoria.css' %}">
 </head>
 <body>
 
@@ -20,12 +20,12 @@
     <div class="logo">
       <span class="logo-icon"><img src="{% static 'imagenes/logo_final2.png' %}" alt=""></span> CRONOS ELEGANCE
     </div>
-    <nav>
-      <ul>
-        <li><a href="{% url 'inicio' %}">Inicio</a></li>
-        <li><a href="{% url 'productos_hombre' %}" class="active">Hombre</a></li>
-        <li><a href="{% url 'productos_mujer' %}">Mujer</a></li>
-        <li><a href="#">Contacto</a></li>
+    <!-- 🔹 Menú principal -->
+    <nav class="main-nav">
+      <ul class="nav-list">
+        <li><a href="{% url 'inicio' %}" class="active">Inicio</a></li>
+        <li><a href="{% url 'productos_todos' %}">Productos</a></li>
+        <li><a href="{% url 'contacto' %}" >Contacto</a></li>
       </ul>
     </nav>
 
@@ -104,7 +104,7 @@
     <p class="copy">© 2025 Cronos Elegance. Todos los derechos reservados.</p>
 </footer>
 
-<script src="{% static 'wishlist-toggle.js' %}"></script>
-<script src="{% static 'submenulogin.js' %}"></script>
+<script src="{% static 'js/wishlist-toggle.js' %}"></script>
+<script src="{% static 'js/submenulogin.js' %}"></script>
 </body>
 </html>
