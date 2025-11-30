@@ -1,11 +1,9 @@
-// submenulogin.js
-
 document.addEventListener("DOMContentLoaded", () => {
     const userIcon = document.getElementById("userIcon");
     const userMenu = userIcon ? userIcon.closest(".user-menu") : null;
 
     if (userIcon && userMenu) {
-        // Mostrar / ocultar el dropdown al hacer clic
+        // Mostrar / ocultar al hacer clic
         userIcon.addEventListener("click", (e) => {
             e.preventDefault();
             userMenu.classList.toggle("active");

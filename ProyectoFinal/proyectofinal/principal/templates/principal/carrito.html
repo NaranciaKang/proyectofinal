@@ -11,16 +11,21 @@
 </head>
 <body>
 
-<!-- 🔸 Header -->
+<!-- Top Bar -->
+<div class="top-bar">
+Envío gratuito en todos los pedidos
+</div>
+
+<!-- Header -->
 <header class="main-header">
 <div class="container header-content">
-    <!-- 🔹 Logo -->
+    <!-- Logo -->
     <div class="logo">
     <span class="logo-icon"><img src="{% static 'imagenes/logo_final2.png' %}" alt="Cronos Elegance"></span>
     <span class="logo-text">CRONOS ELEGANCE</span>
     </div>
 
-    <!-- 🔹 Menú principal -->
+    <!-- Menú principal -->
     <nav class="main-nav">
     <ul class="nav-list">
         <li><a href="{% url 'inicio' %}" class="active">Inicio</a></li>
@@ -29,19 +34,19 @@
     </ul>
     </nav>
 
-    <!-- 🔹 Íconos de usuario -->
+    <!-- Íconos de usuario -->
     <div class="icons">
-    <!-- ❤️ Wishlist -->
+    <!-- Wishlist -->
     <a href="{% url 'ver_wishlist' %}" class="icon-link" aria-label="Wishlist">
         <img width="25" src="https://img.icons8.com/ios-glyphs/30/ffffff/like.png" alt="wishlist"/>
     </a>
 
-    <!-- 🛒 Carrito -->
+    <!-- Carrito -->
     <a href="{% url 'ver_carrito' %}" class="icon-link {% if request.resolver_match.url_name == 'ver_carrito' %}active{% endif %}" aria-label="Carrito">
         <img width="25" src="https://img.icons8.com/ios-filled/50/ffffff/shopping-cart.png" alt="cart"/>
     </a>
 
-    <!-- 👤 Usuario -->
+    <!-- Usuario -->
     {% if user.is_authenticated %}
         <div class="user-menu">
         <a href="#" id="userIcon" class="icon-link" aria-label="Usuario">
@@ -59,7 +64,7 @@
     {% endif %}
     </div>
 
-    <!-- 🔹 Menú hamburguesa -->
+    <!-- Menú hamburguesa -->
     <div class="menu-toggle" id="menuToggle">
     <span></span>
     <span></span>
@@ -68,7 +73,7 @@
 </div>
 </header>
 
-<!-- 🔸 Carrito -->
+<!-- Carrito -->
 <section class="carrito">
     <div class="carrito-productos">
         <div class="carrito-header">
@@ -87,7 +92,7 @@
                 
                 <div class="producto-detalles">
                     <h3 class="nombre-producto">{{ item.producto.nombre }}</h3>
-                    <p class="precio-unitario">${{ item.producto.precio }}</p>
+                    <p class="precio-unitario">${{ item.producto.precio|floatformat:0 }}</p>
                     
                     <div class="controles-cantidad">
                         <label for="cantidad-{{ item.id }}">Cantidad:</label>
@@ -100,7 +105,7 @@
                 </div>
                 
                 <div class="producto-acciones">
-                    <div class="subtotal">${{ item.subtotal }}</div>
+                    <div class="subtotal">${{ item.subtotal|floatformat:0 }}</div>
                     <button class="btn-eliminar" data-id="{{ item.id }}" title="Eliminar producto">
                         <i class="fas fa-trash"></i>
                     </button>
@@ -111,7 +116,7 @@
                 <i class="fas fa-shopping-cart"></i>
                 <h3>Tu carrito está vacío</h3>
                 <p>Agrega productos para continuar con tu compra</p>
-                <a href="#" class="btn-seguir-comprando">Seguir Comprando</a>
+                <a href="{% url 'productos_todos' %}" class="btn-seguir-comprando">Seguir Comprando</a>
             </div>
             {% endfor %}
         </div>
@@ -123,7 +128,7 @@
         <div class="resumen-detalles">
             <div class="resumen-linea">
                 <span>Subtotal</span>
-                <span>${{ total }}</span>
+                <span>${{ total|floatformat:0 }}</span>
             </div>
             <div class="resumen-linea">
                 <span>Envío</span>
@@ -131,12 +136,12 @@
             </div>
             <div class="resumen-linea total">
                 <span>Total</span>
-                <span id="total-final">${{ total }}</span>
+                <span id="total-final">${{ total|floatformat:0 }}</span>
             </div>
         </div>
         
         {% if items %}
-            <!-- Botón Comprar que lleva al checkout -->
+            <!-- Botón Comprar -->
             <a href="{% url 'checkout' %}" class="btn-comprar" style="display: block; text-decoration: none;">
                 <button class="btn btn-warning" style="width: 100%;">
                     <i class="fas fa-credit-card"></i> Proceder al Pago
@@ -159,20 +164,42 @@
     </div>
 </section>
 
-<!-- 🔸 Footer -->
+<!-- Footer -->
 <footer class="footer">
     <div class="container footer-grid">
-        <div>
+        <div class="footer-section">
             <h4>Cronos Elegance</h4>
-            <p>Tu destino para la relojería de lujo.</p>
+            <p>Tu destino para la relojería de lujo donde la precisión se encuentra con el estilo.</p>
         </div>
-        <div>
+        
+        <div class="footer-section">
+            <h5>Enlaces Rápidos</h5>
+            <ul class="footer-links">
+                <li><a href="{% url 'inicio' %}">Inicio</a></li>
+                <li><a href="{% url 'productos_todos' %}">Productos</a></li>
+                <li><a href="{%url 'contacto' %}">Contacto</a></li>
+            </ul>
+        </div>
+        
+        <div class="footer-section">
             <h5>Contáctanos</h5>
-            <p>Correo: cronoselegancee@gmail.com</p>
-            <p>Tel: +56 9 1234 5678</p>
+            <div class="contact-info">
+                <p>cronoselegancee@gmail.com</p>
+                <p>+56 9 1234 5678</p>
+                <p>Santiago, Chile</p>
+            </div>
         </div>
     </div>
-    <p class="copy">© 2025 Cronos Elegance. Todos los derechos reservados.</p>
+    
+    <div class="footer-bottom">
+        <div class="container">
+            <p class="copy">© 2025 Cronos Elegance. Todos los derechos reservados.</p>
+            <div class="legal-links">
+                <a href="#">Política de Privacidad</a>
+                <a href="#">Términos y Condiciones</a>
+            </div>
+        </div>
+    </div>
 </footer>
 
 <script src="{% static 'js/submenulogin.js' %}"></script>

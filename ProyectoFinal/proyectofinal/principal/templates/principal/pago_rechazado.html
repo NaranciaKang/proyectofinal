@@ -21,25 +21,24 @@
             <nav class="main-nav">
                 <ul class="nav-list">
                     <li><a href="{% url 'inicio' %}" class="active">Inicio</a></li>
-                    <li><a href="{% url 'productos_todos' %}" class="active">Productos</a></li>
-                    <li><a href="#">Sobre Nosotros</a></li>
-                    <li><a href="#">Contacto</a></li>
+                    <li><a href="{% url 'productos_todos' %}">Productos</a></li>
+                    <li><a href="{% url 'contacto' %}" >Contacto</a></li>
                 </ul>
             </nav>
 
             <!-- Íconos de usuario -->
             <div class="icons">
-                <!-- ❤️ Wishlist -->
+                <!-- Wishlist -->
                 <a href="{% url 'ver_wishlist' %}" class="icon-link" aria-label="Wishlist">
                     <img width="25" src="https://img.icons8.com/ios-glyphs/30/ffffff/like.png" alt="wishlist"/>
                 </a>
 
-                <!-- 🛒 Carrito -->
+                <!-- Carrito -->
                 <a href="{% url 'ver_carrito' %}" class="icon-link" aria-label="Carrito">
                     <img width="25" src="https://img.icons8.com/ios-filled/50/ffffff/shopping-cart.png" alt="cart"/>
                 </a>
 
-                <!-- 👤 Usuario -->
+                <!-- Usuario -->
                 {% if user.is_authenticated %}
                     <div class="user-menu">
                         <a href="#" id="userIcon" class="icon-link" aria-label="Usuario">
@@ -96,22 +95,43 @@
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container footer-grid">
-            <div>
-                <h4>Cronos Elegance</h4>
-                <p>Tu destino para la relojería de lujo.</p>
-            </div>
-            <div>
-                <h5>Contáctanos</h5>
-                <p>Correo: cronoselegancee@gmail.com</p>
-                <p>Tel: +56 9 1234 5678</p>
+<!-- Footer -->
+<footer class="footer">
+    <div class="container footer-grid">
+        <div class="footer-section">
+            <h4>Cronos Elegance</h4>
+            <p>Tu destino para la relojería de lujo donde la precisión se encuentra con el estilo.</p>
+        </div>
+        
+        <div class="footer-section">
+            <h5>Enlaces Rápidos</h5>
+            <ul class="footer-links">
+                <li><a href="{% url 'inicio' %}">Inicio</a></li>
+                <li><a href="{% url 'productos_todos' %}">Productos</a></li>
+                <li><a href="{% url 'contacto' %}">Contacto</a></li>
+            </ul>
+        </div>
+        
+        <div class="footer-section">
+            <h5>Contáctanos</h5>
+            <div class="contact-info">
+                <p>cronoselegancee@gmail.com</p>
+                <p>+56 9 1234 5678</p>
+                <p>Santiago, Chile</p>
             </div>
         </div>
-        <p class="copy">© 2025 Cronos Elegance. Todos los derechos reservados.</p>
-    </footer>
-
+    </div>
+    
+    <div class="footer-bottom">
+        <div class="container">
+            <p class="copy">© 2025 Cronos Elegance. Todos los derechos reservados.</p>
+            <div class="legal-links">
+                <a href="#">Política de Privacidad</a>
+                <a href="#">Términos y Condiciones</a>
+            </div>
+        </div>
+    </div>
+</footer>
     <script src="{% static 'js/submenulogin.js' %}"></script>
 </body>
 </html>

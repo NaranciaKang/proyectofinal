@@ -1,4 +1,3 @@
-// responsive-handler.js - Manejo de comportamientos responsive
 
 class ResponsiveHandler {
     constructor() {
@@ -46,12 +45,12 @@ class ResponsiveHandler {
     }
 
     handleInitialState() {
-        // Ajustes iniciales basados en el breakpoint
+        
         this.applyBreakpointSpecificStyles();
     }
 
     applyBreakpointSpecificStyles() {
-        // Aquí puedes agregar estilos específicos por breakpoint
+        
         const breakpoint = this.currentBreakpoint;
         
         switch(breakpoint) {
@@ -68,13 +67,13 @@ class ResponsiveHandler {
     }
 
     enableTouchInteractions() {
-        // Optimizar para touch
+        
         document.body.classList.add('touch-device');
         document.body.classList.remove('hover-device');
     }
 
     enableHoverInteractions() {
-        // Optimizar para hover
+        
         document.body.classList.add('hover-device');
         document.body.classList.remove('touch-device');
     }
@@ -91,7 +90,7 @@ class ResponsiveHandler {
         });
         document.dispatchEvent(event);
         
-        // Aplicar estilos específicos del nuevo breakpoint
+        
         this.applyBreakpointSpecificStyles();
     }
 
@@ -112,13 +111,13 @@ class ResponsiveHandler {
         return this.currentBreakpoint === 'lg' || this.currentBreakpoint === 'xl';
     }
 
-    // Métodos públicos para verificar el estado actual
+    
     getBreakpoint() {
         return this.currentBreakpoint;
     }
 }
 
-// Inicializar cuando el DOM esté listo
+
 document.addEventListener('DOMContentLoaded', () => {
     new ResponsiveHandler();
 });

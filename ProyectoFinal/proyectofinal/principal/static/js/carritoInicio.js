@@ -14,10 +14,10 @@ document.addEventListener("DOMContentLoaded", () => {
                         "X-Requested-With": "XMLHttpRequest",
                         "Accept": "application/json"
                     },
-                    credentials: "same-origin" // importante para enviar cookies
+                    credentials: "same-origin" 
                 });
 
-                // Intentamos parsear JSON; si no es JSON, mostramos error controlado
+                
                 let data;
                 const text = await res.text();
                 try {
@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (res.ok && data.success) {
                     mostrarNotificacion(`✅ ${data.mensaje}`, "success", true);
                 } else {
-                    // Si el servidor devolvió JSON pero con success false:
+                    // error al agregar un producto
                     const msg = data.mensaje || "❌ Error al agregar el producto";
                     mostrarNotificacion(msg, "error");
                 }
@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (conVerCarrito) {
             const a = document.createElement("a");
-            a.href = "/carrito/"; // si estás renderizando este JS desde template, o reemplaza por '/carrito/'
+            a.href = "/carrito/"; 
             a.innerText = " Ver carrito";
             a.className = "ver-carrito";
             noti.appendChild(a);

@@ -2,15 +2,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const botones = document.querySelectorAll(".btn-wishlist-toggle");
 
     botones.forEach(btn => {
-        // Establecer el icono inicial basado en el estado
         const marcado = btn.getAttribute("aria-pressed") === "true";
         btn.textContent = marcado ? "❤️" : "🤍";
 
-        btn.addEventListener("click", async () => {
+        btn.addEventListener("click", async (e) => {
+            e.preventDefault(); 
             const productoId = btn.getAttribute("data-id");
             const marcado = btn.getAttribute("aria-pressed") === "true";
 
-            if (!productoId) return; // si es link de login, salir
+            if (!productoId) return;
 
             try {
                 const url = marcado
@@ -29,38 +29,47 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 let data;
                 const text = await response.text();
+                
                 try {
                     data = text ? JSON.parse(text) : {};
                 } catch (err) {
                     console.error("Respuesta no JSON:", text);
-                    mostrarNotificacion("⚠️ Respuesta inesperada del servidor", "error");
+                    if (response.status === 403 || response.status === 302) {
+                        window.location.reload();
+                        return;
+                    }
+                    mostrarNotificacion("⚠️ Error inesperado del servidor", "error");
                     return;
                 }
 
-                if (response.ok && data.success) {
-                    // Cambiar el icono del corazón
-                    if (marcado) {
-                        btn.textContent = "🤍"; // Corazón blanco
-                        btn.setAttribute("aria-pressed", "false");
-                        mostrarNotificacion(`❌ ${data.mensaje}`, "error");
+                if (response.ok) {
+                    if (data.success) {
+                        // Cambiar el icono del corazón
+                        if (marcado) {
+                            btn.textContent = "🤍";
+                            btn.setAttribute("aria-pressed", "false");
+                        } else {
+                            btn.textContent = "❤️";
+                            btn.setAttribute("aria-pressed", "true");
+                        }
+                        mostrarNotificacion(data.mensaje, "success");
                     } else {
-                        btn.textContent = "❤️"; // Corazón rojo
-                        btn.setAttribute("aria-pressed", "true");
-                        mostrarNotificacion(`✅ ${data.mensaje}`, "success");
+                        //  ya está en wishlist
+                        mostrarNotificacion(data.mensaje, "error");
                     }
                 } else {
-                    const msg = data.mensaje || "❌ Error al actualizar favoritos";
+                    // Error al actualizar favoritos
+                    const msg = data.mensaje || `❌ Error ${response.status} al actualizar favoritos`;
                     mostrarNotificacion(msg, "error");
                 }
 
             } catch (err) {
-                console.error(err);
-                mostrarNotificacion("⚠️ Error de red o del servidor", "error");
+                console.error("Error de red:", err);
+                mostrarNotificacion("⚠️ Error de conexión", "error");
             }
         });
     });
 
-    // Función para obtener el token CSRF
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== "") {
@@ -76,31 +85,28 @@ document.addEventListener("DOMContentLoaded", () => {
         return cookieValue;
     }
 
-    // 🔔 Función de notificación
-    function mostrarNotificacion(msg, tipo = "success", conVerCarrito = false) {
+    // Función de notificación mejorada
+    function mostrarNotificacion(msg, tipo = "success") {
+        const notificacionesExistentes = document.querySelectorAll('.notificacion');
+        notificacionesExistentes.forEach(noti => noti.remove());
+
         const noti = document.createElement("div");
-        noti.className = "notificacion";
+        noti.className = `notificacion ${tipo === "error" ? "error" : ""}`;
         noti.innerHTML = `<span class="mensaje">${msg}</span>`;
 
-        // si quieres agregar un botón o link especial, puedes cambiar "Ver carrito" por otro texto
-        if (conVerCarrito) {
-            const a = document.createElement("a");
-            a.href = "/wishlist/";
-            a.innerText = " Ver wishlist";
-            a.className = "ver-carrito";
-            noti.appendChild(a);
-        }
-
-        if (tipo === "error") {
-            noti.style.background = "#dc3545";
-        }
-
         document.body.appendChild(noti);
+        
+        // Animación de entrada
         setTimeout(() => noti.classList.add("show"), 50);
 
+        // eliminar después de 3 segundos
         setTimeout(() => {
             noti.classList.remove("show");
-            setTimeout(() => noti.remove(), 300);
+            setTimeout(() => {
+                if (noti.parentNode) {
+                    noti.parentNode.removeChild(noti);
+                }
+            }, 300);
         }, 3000);
     }
 });

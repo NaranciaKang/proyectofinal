@@ -1,5 +1,4 @@
-// user-menu.js - Gestión del menú desplegable del usuario
-
+//  Gestión del menú desplegable del usuario
 class UserMenuManager {
     constructor() {
         this.userMenu = document.querySelector('.user-menu');
@@ -16,7 +15,6 @@ class UserMenuManager {
     }
 
     bindEvents() {
-        // Toggle del dropdown
         this.userMenu.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -51,10 +49,8 @@ class UserMenuManager {
         this.dropdown.style.display = 'block';
         this.isOpen = true;
         
-        // Agregar clase activa
         this.userMenu.classList.add('active');
         
-        // Disparar evento
         this.dispatchEvent('userMenuOpened');
     }
 
@@ -62,10 +58,8 @@ class UserMenuManager {
         this.dropdown.style.display = 'none';
         this.isOpen = false;
         
-        // Remover clase activa
         this.userMenu.classList.remove('active');
         
-        // Disparar evento
         this.dispatchEvent('userMenuClosed');
     }
 
@@ -77,7 +71,6 @@ class UserMenuManager {
     }
 }
 
-// Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => {
     new UserMenuManager();
 });

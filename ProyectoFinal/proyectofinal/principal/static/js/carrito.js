@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll(".subtotal").forEach(sub => {
             total += parseFloat(sub.innerText.replace("$", "")) || 0;
         });
-        totalFinal.innerText = "$" + total.toFixed(0);
+        totalFinal.innerText = "$" + Math.round(total);  // 🔥 Cambio aquí
         
         // Mostrar/ocultar botón de comprar según si hay items
         const itemsCount = document.querySelectorAll(".producto-card").length;
@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Actualizar cantidades con AJAX
+    // Actualizar cantidades 
     document.querySelectorAll(".cantidad").forEach(input => {
         input.addEventListener("change", () => {
             let itemId = input.dataset.id;
@@ -46,10 +46,10 @@ document.addEventListener("DOMContentLoaded", () => {
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    // Encuentra el elemento subtotal en la misma tarjeta
+                    
                     const productoCard = input.closest(".producto-card");
                     const subtotalElement = productoCard.querySelector(".subtotal");
-                    subtotalElement.innerText = "$" + data.subtotal;
+                    subtotalElement.innerText = "$" + Math.round(data.subtotal);  // 🔥 Cambio importante aquí
                     actualizarTotal();
                     
                     // Mostrar notificación
@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // Eliminar producto con AJAX
+    // Eliminar producto 
     document.querySelectorAll(".btn-eliminar").forEach(btn => {
         btn.addEventListener("click", () => {
             let itemId = btn.dataset.id;
@@ -83,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    // Eliminar la tarjeta del producto
+                    // Eliminar el producto
                     const productoCard = btn.closest(".producto-card");
                     productoCard.remove();
                     actualizarTotal();
@@ -96,7 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                 <i class="fas fa-shopping-cart"></i>
                                 <h3>Tu carrito está vacío</h3>
                                 <p>Agrega productos para continuar con tu compra</p>
-                                <a href="#" class="btn-seguir-comprando">Seguir Comprando</a>
+                                <a href="{% url 'productos_todos' %}" class="btn-seguir-comprando">Seguir Comprando</a>
                             </div>
                         `;
                     }
@@ -111,14 +111,13 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // Funcionalidad para los botones de incremento/decremento
+    // Funcionalidad para los botones de agregar otro producto
     document.querySelectorAll(".btn-cantidad.sumar").forEach(btn => {
         btn.addEventListener("click", () => {
             const input = btn.parentElement.querySelector(".cantidad");
             let cantidad = parseInt(input.value) + 1;
             input.value = cantidad;
             
-            // Disparar el evento change para actualizar automáticamente
             const event = new Event('change');
             input.dispatchEvent(event);
         });
@@ -132,7 +131,6 @@ document.addEventListener("DOMContentLoaded", () => {
             if (cantidad < 1) cantidad = 1;
             input.value = cantidad;
             
-            // Disparar el evento change para actualizar automáticamente
             const event = new Event('change');
             input.dispatchEvent(event);
         });
@@ -154,7 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function mostrarNotificacion(mensaje, tipo = "success") {
-        // Crear notificación si no existe
+        
         let notificacion = document.querySelector('.notificacion-carrito');
         if (!notificacion) {
             notificacion = document.createElement('div');

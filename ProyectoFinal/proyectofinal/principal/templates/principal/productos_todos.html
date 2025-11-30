@@ -11,42 +11,42 @@
 </head>
 <body>
 
-<!-- 🔸 Top Bar -->
+<!-- Top Bar -->
 <div class="top-bar">
   Envío gratuito en todos los pedidos
 </div>
 
-<!-- 🔸 Header -->
+<!-- Header -->
 <header class="main-header">
   <div class="container header-content">
-    <!-- 🔹 Logo -->
+    <!-- Logo -->
     <div class="logo">
       <span class="logo-icon"><img src="{% static 'imagenes/logo_final2.png' %}" alt="Cronos Elegance"></span>
       <span class="logo-text">CRONOS ELEGANCE</span>
     </div>
 
-    <!-- 🔹 Menú principal -->
+    <!-- Menú principal -->
     <nav class="main-nav">
       <ul class="nav-list">
-        <li><a href="{% url 'inicio' %}" class="active">Inicio</a></li>
-        <li><a href="{% url 'productos_todos' %}">Productos</a></li>
-        <li><a href="{% url 'contacto' %}" >Contacto</a></li>
+        <li><a href="{% url 'inicio' %}">Inicio</a></li>
+        <li><a href="{% url 'productos_todos' %}" class="active">Productos</a></li>
+        <li><a href="{% url 'contacto' %}">Contacto</a></li>
       </ul>
     </nav>
 
-    <!-- 🔹 Íconos de usuario -->
+    <!-- Íconos de usuario -->
     <div class="icons">
-      <!-- ❤️ Wishlist -->
+      <!-- Wishlist -->
       <a href="{% url 'ver_wishlist' %}" class="icon-link" aria-label="Wishlist">
         <img width="25" src="https://img.icons8.com/ios-glyphs/30/ffffff/like.png" alt="wishlist"/>
       </a>
 
-      <!-- 🛒 Carrito -->
+      <!-- Carrito -->
       <a href="{% url 'ver_carrito' %}" class="icon-link" aria-label="Carrito">
         <img width="25" src="https://img.icons8.com/ios-filled/50/ffffff/shopping-cart.png" alt="cart"/>
       </a>
 
-      <!-- 👤 Usuario -->
+      <!-- Usuario -->
       {% if user.is_authenticated %}
         <div class="user-menu">
           <a href="#" id="userIcon" class="icon-link" aria-label="Usuario">
@@ -64,7 +64,7 @@
       {% endif %}
     </div>
 
-    <!-- 🔹 Menú hamburguesa -->
+    <!-- Menú hamburguesa -->
     <div class="menu-toggle" id="menuToggle">
       <span></span>
       <span></span>
@@ -73,7 +73,7 @@
   </div>
 </header>
 
-<!-- 🔸 Hero Section de Productos -->
+<!-- Encabezado Productos -->
 <section class="hero-productos">
   <div class="container">
     <h1>Nuestra Colección Completa</h1>
@@ -81,7 +81,7 @@
   </div>
 </section>
 
-<!-- 🔸 Filtros y Ordenamiento -->
+<!-- Filtros -->
 <section class="filtros-section">
   <div class="container">
     <div class="filtros-container">
@@ -102,7 +102,7 @@
   </div>
 </section>
 
-<!-- 🔸 Grid de Productos -->
+<!-- Grid de Productos -->
 <section class="productos-grid-section">
   <div class="container">
     <div class="productos-header">
@@ -120,12 +120,12 @@
           <img src="{% static 'img/default.jpg' %}" alt="{{ p.nombre }}" class="producto-img">
           {% endif %}
           
-          <!-- 🔹 Badge de Categoría -->
+          <!-- Badge de Categoría -->
           <span class="categoria-badge {% if p.categoria == 'H' %}hombre{% else %}mujer{% endif %}">
             {{ p.get_categoria_display }}
           </span>
 
-          <!-- 🔹 Botón Wishlist - Mismo que en inicio -->
+          <!-- Botón Wishlist -->
           {% if user.is_authenticated %}
           <button class="btn-favorite btn-wishlist-toggle" data-id="{{ p.id }}" aria-pressed="{{ p.en_wishlist|yesno:'true,false' }}">
             {% if p.en_wishlist %}❤️{% else %}🤍{% endif %}
@@ -137,9 +137,9 @@
 
         <div class="producto-info">
           <h3 class="producto-nombre">{{ p.nombre }}</h3>
-          <div class="producto-precio">${{ p.precio }}</div>
+          <div class="producto-precio">${{ p.precio|floatformat:0 }}</div>
           
-          <!-- 🔹 Formulario Carrito - Mismo que en inicio -->
+          <!-- Formulario Carrito -->
           <form action="{% url 'agregar_al_carrito' p.id %}" method="POST" class="form-agregar-carrito">
             {% csrf_token %}
             <button type="submit" class="btn-gold-sm">Agregar al carrito</button>
@@ -155,24 +155,45 @@
   </div>
 </section>
 
-<!-- 🔸 Footer -->
+<!-- Footer -->
 <footer class="footer">
-  <div class="container footer-grid">
-    <div class="footer-section">
-      <h4>Cronos Elegance</h4>
-      <p>Tu destino para la relojería de lujo.</p>
+    <div class="container footer-grid">
+        <div class="footer-section">
+            <h4>Cronos Elegance</h4>
+            <p>Tu destino para la relojería de lujo donde la precisión se encuentra con el estilo.</p>
+        </div>
+        
+        <div class="footer-section">
+            <h5>Enlaces Rápidos</h5>
+            <ul class="footer-links">
+                <li><a href="{% url 'inicio' %}">Inicio</a></li>
+                <li><a href="{% url 'productos_todos' %}">Productos</a></li>
+                <li><a href="{%url 'contacto' %}">Contacto</a></li>
+            </ul>
+        </div>
+        
+        <div class="footer-section">
+            <h5>Contáctanos</h5>
+            <div class="contact-info">
+                <p>cronoselegancee@gmail.com</p>
+                <p>+56 9 1234 5678</p>
+                <p>Santiago, Chile</p>
+            </div>
+        </div>
     </div>
-    <div class="footer-section">
-      <h5>Contáctanos</h5>
-      <p>Correo: cronoselegancee@gmail.com</p>
-      <p>Tel: +56 9 1234 5678</p>
+    
+    <div class="footer-bottom">
+        <div class="container">
+            <p class="copy">© 2025 Cronos Elegance. Todos los derechos reservados.</p>
+            <div class="legal-links">
+                <a href="#">Política de Privacidad</a>
+                <a href="#">Términos y Condiciones</a>
+            </div>
+        </div>
     </div>
-  </div>
-  <p class="copy">© 2025 Cronos Elegance. Todos los derechos reservados.</p>
 </footer>
 
-<!-- 🔹 Scripts -->
-<script src="{% static 'js/productos.js' %}"></script>
+
 <script src="{% static 'js/submenulogin.js' %}"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{% static 'js/carritoInicio.js' %}"></script>
@@ -181,5 +202,6 @@
 <script src="{% static 'js/user-menu.js' %}"></script>
 <script src="{% static 'js/responsive-handler.js' %}"></script>
 <script src="{% static 'js/main.js' %}"></script>
+<script src="{% static 'js/productos.js' %}"></script>
 </body>
 </html>

@@ -10,20 +10,19 @@
 </head>
 <body>
 
-<!-- 🔸 Header -->
+<!-- Header -->
 <header class="main-header">
     <div class="container header-content">
         <div class="logo">
             <span class="logo-icon"><img src="{% static 'imagenes/logo_final2.png' %}" alt=""></span> CRONOS ELEGANCE
         </div>
-        <nav>
-            <ul>
-                <li><a href="{% url 'inicio' %}">Inicio</a></li>
-                <li><a href="#">Ofertas</a></li>
-                <li><a href="#">Sobre Nosotros</a></li>
-                <li><a href="#">Contacto</a></li>
-            </ul>
-        </nav>
+        <nav class="main-nav">
+    <ul class="nav-list">
+        <li><a href="{% url 'inicio' %}" class="active">Inicio</a></li>
+        <li><a href="{% url 'productos_todos' %}">Productos</a></li>
+        <li><a href="{% url 'contacto' %}" >Contacto</a></li>
+    </ul>
+    </nav>
         <div class="icons">
             <a href="{% url 'ver_wishlist' %}" class="icon-link">
                 <img width="25" src="https://img.icons8.com/ios-glyphs/30/ffffff/like.png" alt="wishlist"/>
@@ -44,7 +43,7 @@
     </div>
 </header>
 
-<!-- 🔸 Checkout -->
+<!-- Checkout -->
 <section class="carrito">
     <div class="carrito-productos">
         <h2>Finalizar Compra</h2>
@@ -93,21 +92,21 @@
                                         {% endif %}
                                         <div>
                                             <p class="nombre-producto">{{ item.producto.nombre }}</p>
-                                            <span class="precio-unitario">${{ item.producto.precio }} c/u</span>
+                                            <span class="precio-unitario">${{ item.producto.precio|floatformat:0 }} c/u</span>
                                         </div>
                                     </div>
                                 </td>
                                 <td>{{ item.cantidad }}</td>
-                                <td>${{ item.subtotal }}</td>
+                                <td>${{ item.subtotal|floatformat:0 }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                     
                     <div class="mt-4">
-                        <h4>Total a Pagar: ${{ total }}</h4>
+                        <h4>Total a Pagar: ${{ total|floatformat:0 }}</h4>
                         <button type="submit" class="btn btn-warning btn-lg mt-3">
-                            🛒 Pagar con Webpay
+                            Pagar
                         </button>
                         <a href="{% url 'ver_carrito' %}" class="btn btn-secondary mt-3 ms-2">
                             ← Volver al Carrito
@@ -121,7 +120,7 @@
                     <h4>Resumen del Pago</h4>
                     <div class="d-flex justify-content-between mb-2">
                         <span>Subtotal:</span>
-                        <span>${{ total }}</span>
+                        <span>${{ total|floatformat:0 }}</span>
                     </div>
                     <div class="d-flex justify-content-between mb-2">
                         <span>Envío:</span>
@@ -130,7 +129,7 @@
                     <hr>
                     <div class="d-flex justify-content-between mb-3">
                         <strong>Total:</strong>
-                        <strong>${{ total }}</strong>
+                        <strong>${{ total|floatformat:0 }}</strong>
                     </div>
                     <div class="alert alert-info">
                         <small>🔒 Pago seguro procesado por Transbank</small>
@@ -141,20 +140,42 @@
     </div>
 </section>
 
-<!-- 🔸 Footer -->
+<!-- Footer -->
 <footer class="footer">
     <div class="container footer-grid">
-        <div>
+        <div class="footer-section">
             <h4>Cronos Elegance</h4>
-            <p>Tu destino para la relojería de lujo.</p>
+            <p>Tu destino para la relojería de lujo donde la precisión se encuentra con el estilo.</p>
         </div>
-        <div>
+        
+        <div class="footer-section">
+            <h5>Enlaces Rápidos</h5>
+            <ul class="footer-links">
+                <li><a href="{% url 'inicio' %}">Inicio</a></li>
+                <li><a href="{% url 'productos_todos' %}">Productos</a></li>
+                <li><a href="{% url 'contacto' %}">Contacto</a></li>
+            </ul>
+        </div>
+        
+        <div class="footer-section">
             <h5>Contáctanos</h5>
-            <p>Correo: cronoselegancee@gmail.com</p>
-            <p>Tel: +56 9 1234 5678</p>
+            <div class="contact-info">
+                <p>cronoselegancee@gmail.com</p>
+                <p>+56 9 1234 5678</p>
+                <p>Santiago, Chile</p>
+            </div>
         </div>
     </div>
-    <p class="copy">© 2025 Cronos Elegance. Todos los derechos reservados.</p>
+    
+    <div class="footer-bottom">
+        <div class="container">
+            <p class="copy">© 2025 Cronos Elegance. Todos los derechos reservados.</p>
+            <div class="legal-links">
+                <a href="#">Política de Privacidad</a>
+                <a href="#">Términos y Condiciones</a>
+            </div>
+        </div>
+    </div>
 </footer>
 
 <script src="{% static 'js/submenulogin.js' %}"></script>

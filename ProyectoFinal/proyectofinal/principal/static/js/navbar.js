@@ -1,4 +1,3 @@
-// navbar.js - Gestión del menú responsive y navegación
 
 class NavbarManager {
     constructor() {
@@ -16,7 +15,7 @@ class NavbarManager {
     }
 
     bindEvents() {
-        // Toggle del menú hamburguesa
+        // menú hamburguesa
         this.toggle.addEventListener('click', () => this.toggleMenu());
         
         // Cerrar menú al hacer clic en enlaces
@@ -30,7 +29,6 @@ class NavbarManager {
         // Cerrar menú con Escape
         document.addEventListener('keydown', (e) => this.handleKeydown(e));
         
-        // Manejar redimensionamiento de ventana
         window.addEventListener('resize', () => this.handleResize());
     }
 
@@ -49,10 +47,8 @@ class NavbarManager {
         this.toggle.classList.add('active');
         this.body.style.overflow = 'hidden';
         
-        // Agregar overlay
         this.createOverlay();
         
-        // Disparar evento personalizado
         this.dispatchEvent('menuOpened');
     }
 
@@ -62,10 +58,8 @@ class NavbarManager {
         this.body.style.overflow = '';
         this.isOpen = false;
         
-        // Remover overlay
         this.removeOverlay();
         
-        // Disparar evento personalizado
         this.dispatchEvent('menuClosed');
     }
 
@@ -88,12 +82,10 @@ class NavbarManager {
         
         document.body.appendChild(overlay);
         
-        // Animar overlay
         setTimeout(() => {
             overlay.style.opacity = '1';
         }, 10);
         
-        // Cerrar menú al hacer clic en overlay
         overlay.addEventListener('click', () => this.closeMenu());
     }
 
@@ -128,7 +120,6 @@ class NavbarManager {
     }
 
     handleResize() {
-        // Cerrar menú si se redimensiona a desktop
         if (window.innerWidth > 992 && this.isOpen) {
             this.closeMenu();
         }
@@ -141,12 +132,10 @@ class NavbarManager {
         document.dispatchEvent(event);
     }
 
-    // Método público para cerrar menú desde otros scripts
     close() {
         this.closeMenu();
     }
 
-    // Método público para abrir menú desde otros scripts
     open() {
         this.openMenu();
     }
@@ -156,7 +145,6 @@ class NavbarManager {
 document.addEventListener('DOMContentLoaded', () => {
     new NavbarManager();
     
-    // Agregar estilos para el overlay
     const styles = `
         @media (max-width: 992px) {
             .nav-container {

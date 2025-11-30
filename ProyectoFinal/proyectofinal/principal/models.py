@@ -30,7 +30,7 @@ class ItemCarrito(models.Model):
         return self.cantidad * self.producto.precio
 
 
-# 🔹 WISHLIST
+# WISHLIST
 class Wishlist(models.Model):
     usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name="wishlist")
 
