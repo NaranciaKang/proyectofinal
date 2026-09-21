@@ -11,8 +11,8 @@ from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.contrib.admin.views.decorators import staff_member_required
 
 from transbank.webpay.webpay_plus.transaction import Transaction, WebpayOptions
 from django.conf import settings
@@ -22,12 +22,13 @@ import uuid
 from .utils import enviar_boleta_email
 
 
+@staff_member_required
 def principal(request):
     if request.method == 'POST':
         form = ProductoForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            return redirect('principal')  # evita reenvío del form
+            return redirect('inventario')  # evita reenvío del form
     else:
         form = ProductoForm()
 
@@ -70,6 +71,8 @@ def registro(request):
 
         if User.objects.filter(username=username).exists():
             messages.error(request, "El usuario ya existe")
+        elif User.objects.filter(email=email).exists():
+            messages.error(request, "Ya existe una cuenta con ese correo")
         else:
             user = User.objects.create_user(username=username, email=email, password=password)
             user.save()
@@ -125,13 +128,24 @@ def password_reset_request(request):
 # ---------------------- CARRITO ----------------------
 
 def obtener_carrito(request):
-    """ Obtiene el carrito actual del usuario logueado (o crea uno). 
-        Si no hay login, se usa un carrito general con id=1 
+    """ Obtiene el carrito del usuario logueado, o el carrito anónimo
+        aislado por sesión (guardado en request.session['carrito_id']).
     """
     if request.user.is_authenticated:
         carrito, _ = Carrito.objects.get_or_create(usuario=request.user)
-    else:
-        carrito, _ = Carrito.objects.get_or_create(id=1)  # carrito global
+        return carrito
+
+    if not request.session.session_key:
+        request.session.create()
+
+    carrito_id = request.session.get('carrito_id')
+    if carrito_id:
+        carrito = Carrito.objects.filter(id=carrito_id, usuario__isnull=True).first()
+        if carrito:
+            return carrito
+
+    carrito = Carrito.objects.create(usuario=None)
+    request.session['carrito_id'] = carrito.id
     return carrito
 
 
@@ -156,32 +170,38 @@ def ver_carrito(request):
     return render(request, "principal/carrito.html", {"items": items, "total": total})
 
 
-@csrf_exempt
+@require_POST
 def eliminar_item(request):
-    if request.method == "POST":
-        item_id = request.POST.get("item_id")
-        try:
-            item = ItemCarrito.objects.get(id=item_id)
-            item.delete()
-            return JsonResponse({"success": True})
-        except ItemCarrito.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Item no encontrado"})
-    return JsonResponse({"success": False, "error": "Método inválido"})
+    carrito = obtener_carrito(request)
+    item_id = request.POST.get("item_id")
+    try:
+        item = ItemCarrito.objects.get(id=item_id, carrito=carrito)
+        item.delete()
+        return JsonResponse({"success": True})
+    except ItemCarrito.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Item no encontrado"})
 
 
-@csrf_exempt
+@require_POST
 def actualizar_cantidad(request):
-    if request.method == "POST":
-        item_id = request.POST.get("item_id")
+    carrito = obtener_carrito(request)
+    item_id = request.POST.get("item_id")
+
+    try:
         nueva_cantidad = int(request.POST.get("cantidad", 1))
-        try:
-            item = ItemCarrito.objects.get(id=item_id)
-            item.cantidad = nueva_cantidad
-            item.save()
-            return JsonResponse({"success": True, "subtotal": item.subtotal()})
-        except ItemCarrito.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Item no encontrado"})
-    return JsonResponse({"success": False, "error": "Método inválido"})
+    except (TypeError, ValueError):
+        return JsonResponse({"success": False, "error": "Cantidad inválida"})
+
+    if nueva_cantidad < 1:
+        nueva_cantidad = 1
+
+    try:
+        item = ItemCarrito.objects.get(id=item_id, carrito=carrito)
+        item.cantidad = nueva_cantidad
+        item.save()
+        return JsonResponse({"success": True, "subtotal": item.subtotal()})
+    except ItemCarrito.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Item no encontrado"})
 
 
 def checkout(request):
@@ -221,45 +241,39 @@ def checkout(request):
         )
         
         # Crear transacción en Transbank
-        buy_order = f"orden_{orden.id}"
+        buy_order = f"orden_{orden.id}_{uuid.uuid4().hex[:8]}"
         session_id = request.session.session_key or str(request.user.id)
         return_url = request.build_absolute_uri('/webpay/return/')
-        
+
         try:
             response = tx.create(buy_order, session_id, float(total), return_url)
-            
+
             # Guardar token en la orden
             orden.token_transbank = response['token']
             orden.save()
-            
+
             # Redirigir a Transbank
             return render(request, "principal/redirect_webpay.html", {
                 'token': response['token'],
                 'url': response['url']
             })
-            
+
         except Exception as e:
             orden.estado = 'fallido'
             orden.save()
             messages.error(request, f"Error al procesar el pago: {str(e)}")
             return redirect("ver_carrito")
-    
+
     # GET request - mostrar formulario de checkout
     return render(request, "principal/checkout.html", {
-        "items": items, 
+        "items": items,
         "total": total
     })
 
 
 def agregar_al_carrito(request, producto_id):
     producto = get_object_or_404(Producto, id=producto_id)
-
-    # Buscar carrito
-    if request.user.is_authenticated:
-        carrito, _ = Carrito.objects.get_or_create(usuario=request.user)
-    else:
-        # Carrito anónimo -> opcional manejar por sesión
-        carrito, _ = Carrito.objects.get_or_create(usuario=None)
+    carrito = obtener_carrito(request)
 
     # Agregar producto o aumentar cantidad
     item, creado = ItemCarrito.objects.get_or_create(carrito=carrito, producto=producto)
@@ -383,65 +397,8 @@ environment = settings.TRANSBANK['ENVIRONMENT']
 
 tx = Transaction(WebpayOptions(commerce_code, api_key, environment))
 
-def checkout(request):
-    if request.method == "POST":
-        direccion = request.POST.get("direccion")
-        comuna = request.POST.get("comuna")
-        
-        carrito = obtener_carrito(request)
-        items = carrito.items.all()
-        total = sum(item.subtotal() for item in items)
-        
-        if total == 0:
-            messages.error(request, "El carrito está vacío")
-            return redirect("ver_carrito")
-        
-        # Crear orden de compra
-        orden = OrdenCompra.objects.create(
-            usuario=request.user if request.user.is_authenticated else None,
-            carrito=carrito,
-            total=total,
-            direccion=direccion,
-            comuna=comuna,
-            estado='pendiente'
-        )
-        
-        # Crear transacción en Transbank
-        buy_order = f"orden_{orden.id}_{uuid.uuid4().hex[:8]}"
-        session_id = request.session.session_key or str(request.user.id) if request.user.is_authenticated else str(uuid.uuid4())
-        return_url = request.build_absolute_uri('/webpay/return/')
-        
-        try:
-            response = tx.create(buy_order, session_id, float(total), return_url)
-            
-            # Guardar token en la orden
-            orden.token_transbank = response['token']
-            orden.save()
-            
-            # Redirigir a Transbank
-            return render(request, "principal/redirect_webpay.html", {
-                'token': response['token'],
-                'url': response['url']
-            })
-            
-        except Exception as e:
-            orden.estado = 'fallido'
-            orden.save()
-            messages.error(request, f"Error al crear transacción: {str(e)}")
-            return redirect("ver_carrito")
-    
-    # GET request - mostrar formulario de checkout
-    carrito = obtener_carrito(request)
-    items = carrito.items.all()
-    total = sum(item.subtotal() for item in items)
-    
-    return render(request, "principal/checkout.html", {
-        "items": items, 
-        "total": total
-    })
 
-
-#modificacion 
+#modificacion
 def webpay_return(request):
     token = request.GET.get('token_ws')
     

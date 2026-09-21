@@ -35,7 +35,6 @@ urlpatterns = [
         name="password_reset_complete"),
     
     #TRANSBANK
-    path("checkout/", views.checkout, name="checkout"),
     path("webpay/return/", views.webpay_return, name="webpay_return"),
     path("webpay/failure/", views.webpay_failure, name="webpay_failure"),
 
