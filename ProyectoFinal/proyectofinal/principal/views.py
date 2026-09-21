@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Producto, Carrito, ItemCarrito, Wishlist, ItemWishlist
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from .forms import ProductoForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
@@ -13,6 +13,8 @@ from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
 from django.views.decorators.http import require_POST
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 
 from transbank.webpay.webpay_plus.transaction import Transaction, WebpayOptions
 from django.conf import settings
@@ -47,7 +49,7 @@ def inicio(request):
         wishlist = obtener_wishlist(request)
         wishlist_ids = list(wishlist.items.values_list('producto_id', flat=True))
 
-    # 🔹 Agregamos un atributo 'en_wishlist' a cada producto
+    # Agregamos un atributo 'en_wishlist' a cada producto
     for p in productos_lista:
         p.en_wishlist = p.id in wishlist_ids
 
@@ -74,6 +76,13 @@ def registro(request):
         elif User.objects.filter(email=email).exists():
             messages.error(request, "Ya existe una cuenta con ese correo")
         else:
+            try:
+                validate_password(password)
+            except ValidationError as errores:
+                for error in errores.messages:
+                    messages.error(request, error)
+                return render(request, "principal/registro.html")
+
             user = User.objects.create_user(username=username, email=email, password=password)
             user.save()
             messages.success(request, "Usuario creado correctamente")
@@ -281,7 +290,7 @@ def agregar_al_carrito(request, producto_id):
         item.cantidad += 1
     item.save()
 
-    # 🔹 Si la petición viene de fetch (AJAX), devolvemos JSON
+    # Si la petición viene de fetch (AJAX), devolvemos JSON
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         return JsonResponse({"success": True, "mensaje": f"{producto.nombre} agregado al carrito"})
 
@@ -305,9 +314,9 @@ def agregar_wishlist(request, producto_id):
     item, creado = ItemWishlist.objects.get_or_create(wishlist=wishlist, producto=producto)
 
     if creado:
-        return JsonResponse({"success": True, "mensaje": f"✅ {producto.nombre} se agregó a tu wishlist."})
+        return JsonResponse({"success": True, "mensaje": f"{producto.nombre} se agregó a tu wishlist."})
     else:
-        return JsonResponse({"success": False, "mensaje": f"⚠️ {producto.nombre} ya está en tu wishlist."})
+        return JsonResponse({"success": False, "mensaje": f"{producto.nombre} ya está en tu wishlist."})
 
 def ver_wishlist(request):
     if not request.user.is_authenticated:
@@ -421,13 +430,9 @@ def webpay_return(request):
             orden.estado = 'pagado'
             orden.save()
             
-            # 🔹 ENVIAR BOLETA POR EMAIL
+            # Enviar boleta por email
             if orden.usuario and orden.usuario.email:
-                exito_email = enviar_boleta_email(orden)
-                if exito_email:
-                    print("✅ Boleta enviada por email correctamente")
-                else:
-                    print("❌ Error al enviar la boleta por email")
+                enviar_boleta_email(orden)
             
             # Vaciar carrito
             orden.carrito.items.all().delete()
@@ -463,15 +468,50 @@ def webpay_failure(request):
 # Contacto
 def contacto(request):
     if request.method == 'POST':
-        nombre = request.POST.get('nombre')
-        email = request.POST.get('email')
-        mensaje = request.POST.get('mensaje')
-        
-        # Aquí puedes procesar el mensaje (guardar en BD, enviar email, etc.)
-        print(f"Mensaje de {nombre} ({email}): {mensaje}")
-        
-        # Por ahora solo redirigimos con un mensaje de éxito
-        messages.success(request, "¡Mensaje enviado correctamente! Te contactaremos pronto.")
+        nombre = request.POST.get('nombre', '').strip()
+        email = request.POST.get('email', '').strip()
+        mensaje = request.POST.get('mensaje', '').strip()
+        es_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
+
+        if not nombre or not email or not mensaje:
+            error = "Por favor completa todos los campos."
+            if es_ajax:
+                return JsonResponse({"success": False, "error": error})
+            messages.error(request, error)
+            return redirect('contacto')
+
+        try:
+            send_mail(
+                subject=f"Nuevo mensaje de contacto - {nombre}",
+                message=f"Nombre: {nombre}\nEmail: {email}\n\nMensaje:\n{mensaje}",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[settings.DEFAULT_FROM_EMAIL],
+                fail_silently=False,
+            )
+            enviado = True
+        except Exception:
+            enviado = False
+
+        if es_ajax:
+            return JsonResponse({"success": enviado})
+
+        if enviado:
+            messages.success(request, "¡Mensaje enviado correctamente! Te contactaremos pronto.")
+        else:
+            messages.error(request, "No se pudo enviar tu mensaje. Intenta nuevamente.")
         return redirect('contacto')
-    
+
     return render(request, 'principal/contacto.html')
+
+
+def robots_txt(request):
+    lineas = [
+        "User-agent: *",
+        "Allow: /",
+        "Disallow: /admin/",
+        "Disallow: /inventario/",
+        "Disallow: /carrito/",
+        "Disallow: /checkout/",
+        f"Sitemap: {request.build_absolute_uri('/sitemap.xml')}",
+    ]
+    return HttpResponse("\n".join(lineas), content_type="text/plain")
