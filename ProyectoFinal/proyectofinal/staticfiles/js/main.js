@@ -15,10 +15,8 @@ class App {
             this.modules.navbar = new NavbarManager();
             this.modules.userMenu = new UserMenuManager();
             this.modules.responsive = new ResponsiveHandler();
-            
-            console.log('✅ Todos los módulos inicializados correctamente');
         } catch (error) {
-            console.error('❌ Error inicializando módulos:', error);
+            console.error('Error inicializando módulos:', error);
         }
     }
 
@@ -37,8 +35,6 @@ class App {
     }
 
     handleBreakpointChange(detail) {
-        console.log(`Breakpoint cambiado: ${detail.old} → ${detail.current}`);
-        
         if (detail.isMobile && !detail.old.includes('xs') && !detail.old.includes('sm')) {
             this.optimizeForMobile();
         } else if (detail.isDesktop && !detail.old.includes('lg') && !detail.old.includes('xl')) {
