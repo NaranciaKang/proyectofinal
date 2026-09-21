@@ -1,0 +1,269 @@
+/* ========= RESET ========= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ========= VARIABLES ========= */
+:root {
+  --primary-gold: #d4af37;
+  --dark-gold: #b58d2b;
+  --dark-bg: #1a1a1a;
+  --light-bg: #f4f4f4;
+  --white: #ffffff;
+  --text-dark: #1a1a1a;
+  --text-light: #ddd;
+}
+
+/* ========= BODY ========= */
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--dark-bg);
+  color: var(--text-light);
+  line-height: 1.6;
+  padding: 40px 20px;
+}
+
+/* ========= CONTAINER ========= */
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  background-color: #222;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  padding: 40px;
+  border: 1px solid #333;
+}
+
+/* ========= TITULOS ========= */
+h1 {
+  font-size: 2rem;
+  color: var(--primary-gold);
+  text-align: center;
+  margin-bottom: 25px;
+  letter-spacing: 1px;
+}
+
+h2 {
+  font-size: 1.5rem;
+  color: var(--white);
+  text-align: center;
+  margin: 40px 0 20px;
+  border-bottom: 2px solid var(--primary-gold);
+  display: inline-block;
+  padding-bottom: 5px;
+}
+
+/* ========= FORMULARIO (nuevo diseño limpio) ========= */
+.form {
+  background: #242424;
+  padding: 30px;
+  border-radius: 12px;
+  border: 1px solid #333;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-bottom: 40px;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Título del formulario */
+.form h3 {
+  color: var(--primary-gold);
+  text-align: center;
+  font-size: 1.3rem;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+}
+
+/* Etiquetas */
+.form label {
+  color: #ccc;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+/* Campos de entrada */
+.form input,
+.form textarea,
+.form select {
+  background: #1a1a1a;
+  border: 1px solid #444;
+  color: #f2f2f2;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.form input:focus,
+.form textarea:focus,
+.form select:focus {
+  border-color: var(--primary-gold);
+  outline: none;
+  box-shadow: 0 0 6px rgba(212,175,55,0.25);
+}
+
+/* Textarea */
+.form textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Botón principal */
+.form .btn {
+  background-color: var(--primary-gold);
+  color: var(--text-dark);
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.form .btn:hover {
+  background-color: var(--dark-gold);
+  color: var(--white);
+  transform: translateY(-1px);
+}
+
+/* Placeholder */
+.form input::placeholder,
+.form textarea::placeholder {
+  color: #888;
+}
+
+/* Separación visual */
+.form hr {
+  border: none;
+  height: 1px;
+  background: #3a3a3a;
+  margin: 15px 0;
+}
+
+/* ========= GRID DE PRODUCTOS ========= */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 25px;
+  margin-top: 25px;
+}
+
+/* ========= CARD DE PRODUCTO ========= */
+.card {
+  background: #1f1f1f;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
+  display: flex;
+  flex-direction: column;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+}
+
+/* ========= IMAGEN ========= */
+.card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.card:hover img {
+  transform: scale(1.05);
+}
+
+.placeholder {
+  width: 100%;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #777;
+  background: #2b2b2b;
+  font-style: italic;
+}
+
+/* ========= CUERPO DE LA CARD ========= */
+.card-body {
+  padding: 20px;
+  flex-grow: 1;
+}
+
+.card-body h3 {
+  color: var(--primary-gold);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.card-body .desc {
+  color: #ccc;
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.card-body .precio {
+  color: var(--primary-gold);
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+/* ========= VACÍO ========= */
+.grid p {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #888;
+  font-style: italic;
+}
+
+/* ========= RESPONSIVE ========= */
+@media (max-width: 768px) {
+  .container {
+    padding: 25px;
+  }
+
+  .form {
+    padding: 20px;
+    gap: 14px;
+  }
+
+  .grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+  }
+
+  h1 {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 20px 10px;
+  }
+
+  .container {
+    padding: 20px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .btn {
+    width: 100%;
+    text-align: center;
+  }
+}

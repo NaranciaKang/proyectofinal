@@ -87,7 +87,9 @@ WSGI_APPLICATION = 'proyectofinal.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        # DB_ENGINE permite correr manage.py test / desarrollo local con
+        # SQLite (django.db.backends.sqlite3) sin necesitar MySQL instalado.
+        'ENGINE': os.environ.get('DB_ENGINE', 'django.db.backends.mysql'),
         'NAME': os.environ.get('DB_NAME', 'proyecto'),
         'USER': os.environ.get('DB_USER', 'root'),
         'PASSWORD': os.environ.get('DB_PASSWORD', 'root'),
@@ -134,6 +136,19 @@ USE_TZ = True
 STATIC_URL = 'static/'
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# WhiteNoise sirve cada estático con un hash en el nombre (ej. main.a1b2c3.js)
+# y cabeceras de caché de largo plazo; el navegador solo vuelve a pedirlo si
+# el contenido cambió. Requiere correr `manage.py collectstatic` después de
+# cada cambio a un archivo estático para regenerar staticfiles/.
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
