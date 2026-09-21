@@ -68,12 +68,12 @@ def generar_boleta_pdf(orden):
     # Tabla de productos
     data = [['Producto', 'Cantidad', 'Precio Unitario', 'Subtotal']]
     
-    for item in orden.carrito.items.all():
+    for detalle in orden.detalles.all():
         data.append([
-            item.producto.nombre,
-            str(item.cantidad),
-            f"${item.producto.precio:,.0f}",
-            f"${item.subtotal():,.0f}"
+            detalle.nombre_producto,
+            str(detalle.cantidad),
+            f"${detalle.precio_unitario:,.0f}",
+            f"${detalle.subtotal():,.0f}"
         ])
     
     table = Table(data, colWidths=[3*inch, 1*inch, 1.5*inch, 1.5*inch])

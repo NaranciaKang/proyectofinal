@@ -5,7 +5,8 @@ from .models import Producto
 
 @admin.register(Producto)
 class ProductoAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'precio', 'foto')
+    list_display = ('nombre', 'precio', 'stock', 'categoria')
+    list_editable = ('stock',)
 
 
 

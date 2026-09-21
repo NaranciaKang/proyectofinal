@@ -18,7 +18,8 @@ from django.core.exceptions import ValidationError
 
 from transbank.webpay.webpay_plus.transaction import Transaction, WebpayOptions
 from django.conf import settings
-from .models import OrdenCompra
+from .models import OrdenCompra, DetalleOrdenCompra
+from django.db.models import F
 import uuid
 
 from .utils import enviar_boleta_email
@@ -165,9 +166,12 @@ def agregar_carrito(request):
         carrito = obtener_carrito(request)
 
         item, creado = ItemCarrito.objects.get_or_create(carrito=carrito, producto=producto)
-        if not creado:
+        if not creado and item.cantidad < producto.stock:
             item.cantidad += 1
             item.save()
+        elif creado and producto.stock < 1:
+            item.delete()
+            return JsonResponse({"success": False, "error": "Producto sin stock disponible"})
 
         return JsonResponse({"success": True, "nombre": producto.nombre, "cantidad": item.cantidad})
 
@@ -205,7 +209,9 @@ def actualizar_cantidad(request):
         nueva_cantidad = 1
 
     try:
-        item = ItemCarrito.objects.get(id=item_id, carrito=carrito)
+        item = ItemCarrito.objects.select_related('producto').get(id=item_id, carrito=carrito)
+        if item.producto.stock > 0 and nueva_cantidad > item.producto.stock:
+            nueva_cantidad = item.producto.stock
         item.cantidad = nueva_cantidad
         item.save()
         return JsonResponse({"success": True, "subtotal": item.subtotal()})
@@ -235,11 +241,17 @@ def checkout(request):
         if not direccion or not comuna:
             messages.error(request, "Por favor completa todos los campos de envío")
             return render(request, "principal/checkout.html", {
-                "items": items, 
+                "items": items,
                 "total": total
             })
-        
-        # Crear orden de compra
+
+        sin_stock = [item for item in items if item.cantidad > item.producto.stock]
+        if sin_stock:
+            nombres = ", ".join(item.producto.nombre for item in sin_stock)
+            messages.error(request, f"No hay stock suficiente para: {nombres}")
+            return redirect('ver_carrito')
+
+        # Crear orden de compra y guardar una copia fija de los items comprados
         orden = OrdenCompra.objects.create(
             usuario=request.user,
             carrito=carrito,
@@ -248,7 +260,15 @@ def checkout(request):
             comuna=comuna,
             estado='pendiente'
         )
-        
+        for item in items:
+            DetalleOrdenCompra.objects.create(
+                orden=orden,
+                producto=item.producto,
+                nombre_producto=item.producto.nombre,
+                cantidad=item.cantidad,
+                precio_unitario=item.producto.precio,
+            )
+
         # Crear transacción en Transbank
         buy_order = f"orden_{orden.id}_{uuid.uuid4().hex[:8]}"
         session_id = request.session.session_key or str(request.user.id)
@@ -284,9 +304,9 @@ def agregar_al_carrito(request, producto_id):
     producto = get_object_or_404(Producto, id=producto_id)
     carrito = obtener_carrito(request)
 
-    # Agregar producto o aumentar cantidad
+    # Agregar producto o aumentar cantidad, sin superar el stock disponible
     item, creado = ItemCarrito.objects.get_or_create(carrito=carrito, producto=producto)
-    if not creado:
+    if not creado and item.cantidad < producto.stock:
         item.cantidad += 1
     item.save()
 
@@ -429,11 +449,18 @@ def webpay_return(request):
             # Pago exitoso
             orden.estado = 'pagado'
             orden.save()
-            
+
+            # Descontar stock según lo efectivamente comprado
+            for detalle in orden.detalles.select_related('producto'):
+                if detalle.producto:
+                    Producto.objects.filter(pk=detalle.producto_id).update(
+                        stock=F('stock') - detalle.cantidad
+                    )
+
             # Enviar boleta por email
             if orden.usuario and orden.usuario.email:
                 enviar_boleta_email(orden)
-            
+
             # Vaciar carrito
             orden.carrito.items.all().delete()
             

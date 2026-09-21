@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -20,12 +21,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-fntp#2ep@zuxq6#_zda2)r(9vl@o^zdk9(_+$kw=ipmixkik6#'
+# Se puede sobreescribir con la variable de entorno DJANGO_SECRET_KEY.
+# El valor por defecto es el que ya estaba commiteado en el repo: se
+# recomienda rotarlo y definir DJANGO_SECRET_KEY en el entorno real.
+SECRET_KEY = os.environ.get(
+    'DJANGO_SECRET_KEY',
+    'django-insecure-fntp#2ep@zuxq6#_zda2)r(9vl@o^zdk9(_+$kw=ipmixkik6#',
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '*').split(',')
 
 
 # Application definition
@@ -81,11 +88,11 @@ WSGI_APPLICATION = 'proyectofinal.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME':'proyecto',
-        'USER':'root',
-        'PASSWORD':'root',
-        'HOST':'localhost',
-        'PORT':'3306',
+        'NAME': os.environ.get('DB_NAME', 'proyecto'),
+        'USER': os.environ.get('DB_USER', 'root'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'root'),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', '3306'),
     }
 }
 
@@ -125,7 +132,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
-import os 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
@@ -143,18 +149,34 @@ MESSAGE_TAGS = {
 
 
 # Configuración de Gmail para enviar correos
+# Los valores por defecto son los que ya estaban commiteados en el repo:
+# se recomienda rotar la contraseña de aplicación y definir
+# EMAIL_HOST_PASSWORD en el entorno real.
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = "cronoselegancee@gmail.com"
-EMAIL_HOST_PASSWORD = "veub vfvv brpv mocx"  # NO la de tu Gmail normal
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'cronoselegancee@gmail.com')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'veub vfvv brpv mocx')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
 # Configuración Transbank
 TRANSBANK = {
-    'COMMERCE_CODE': '597055555532',  # Código de comercio de prueba
-    'API_KEY': '579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C',  # API Key de prueba
-    'ENVIRONMENT': 'INTEGRATION'  # 'INTEGRATION' para pruebas, 'PRODUCTION' para producción
+    'COMMERCE_CODE': os.environ.get('TRANSBANK_COMMERCE_CODE', '597055555532'),  # Código de comercio de prueba
+    'API_KEY': os.environ.get('TRANSBANK_API_KEY', '579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C'),  # API Key de prueba
+    'ENVIRONMENT': os.environ.get('TRANSBANK_ENVIRONMENT', 'INTEGRATION')  # 'INTEGRATION' para pruebas, 'PRODUCTION' para producción
 }
+
+
+# Configuración de seguridad para producción sobre HTTPS.
+# Desactivada por defecto (no rompe un despliegue sin HTTPS todavía
+# configurado); se activa explícitamente con DJANGO_USE_HTTPS=True una
+# vez que el sitio esté servido detrás de HTTPS real.
+USE_HTTPS = os.environ.get('DJANGO_USE_HTTPS', 'False') == 'True'
+SECURE_SSL_REDIRECT = USE_HTTPS
+SESSION_COOKIE_SECURE = USE_HTTPS
+CSRF_COOKIE_SECURE = USE_HTTPS
+if USE_HTTPS:
+    SECURE_HSTS_SECONDS = 60 * 60 * 24 * 7  # 1 semana
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
