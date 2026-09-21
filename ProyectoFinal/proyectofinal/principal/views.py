@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Producto, Carrito, ItemCarrito, Wishlist, ItemWishlist
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from .forms import ProductoForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
@@ -11,23 +11,27 @@ from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 
 from transbank.webpay.webpay_plus.transaction import Transaction, WebpayOptions
 from django.conf import settings
-from .models import OrdenCompra
+from .models import OrdenCompra, DetalleOrdenCompra
+from django.db.models import F
 import uuid
 
 from .utils import enviar_boleta_email
 
 
+@staff_member_required
 def principal(request):
     if request.method == 'POST':
         form = ProductoForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            return redirect('principal')  # evita reenvío del form
+            return redirect('inventario')  # evita reenvío del form
     else:
         form = ProductoForm()
 
@@ -46,7 +50,7 @@ def inicio(request):
         wishlist = obtener_wishlist(request)
         wishlist_ids = list(wishlist.items.values_list('producto_id', flat=True))
 
-    # 🔹 Agregamos un atributo 'en_wishlist' a cada producto
+    # Agregamos un atributo 'en_wishlist' a cada producto
     for p in productos_lista:
         p.en_wishlist = p.id in wishlist_ids
 
@@ -70,7 +74,16 @@ def registro(request):
 
         if User.objects.filter(username=username).exists():
             messages.error(request, "El usuario ya existe")
+        elif User.objects.filter(email=email).exists():
+            messages.error(request, "Ya existe una cuenta con ese correo")
         else:
+            try:
+                validate_password(password)
+            except ValidationError as errores:
+                for error in errores.messages:
+                    messages.error(request, error)
+                return render(request, "principal/registro.html")
+
             user = User.objects.create_user(username=username, email=email, password=password)
             user.save()
             messages.success(request, "Usuario creado correctamente")
@@ -125,13 +138,24 @@ def password_reset_request(request):
 # ---------------------- CARRITO ----------------------
 
 def obtener_carrito(request):
-    """ Obtiene el carrito actual del usuario logueado (o crea uno). 
-        Si no hay login, se usa un carrito general con id=1 
+    """ Obtiene el carrito del usuario logueado, o el carrito anónimo
+        aislado por sesión (guardado en request.session['carrito_id']).
     """
     if request.user.is_authenticated:
         carrito, _ = Carrito.objects.get_or_create(usuario=request.user)
-    else:
-        carrito, _ = Carrito.objects.get_or_create(id=1)  # carrito global
+        return carrito
+
+    if not request.session.session_key:
+        request.session.create()
+
+    carrito_id = request.session.get('carrito_id')
+    if carrito_id:
+        carrito = Carrito.objects.filter(id=carrito_id, usuario__isnull=True).first()
+        if carrito:
+            return carrito
+
+    carrito = Carrito.objects.create(usuario=None)
+    request.session['carrito_id'] = carrito.id
     return carrito
 
 
@@ -142,9 +166,12 @@ def agregar_carrito(request):
         carrito = obtener_carrito(request)
 
         item, creado = ItemCarrito.objects.get_or_create(carrito=carrito, producto=producto)
-        if not creado:
+        if not creado and item.cantidad < producto.stock:
             item.cantidad += 1
             item.save()
+        elif creado and producto.stock < 1:
+            item.delete()
+            return JsonResponse({"success": False, "error": "Producto sin stock disponible"})
 
         return JsonResponse({"success": True, "nombre": producto.nombre, "cantidad": item.cantidad})
 
@@ -156,32 +183,40 @@ def ver_carrito(request):
     return render(request, "principal/carrito.html", {"items": items, "total": total})
 
 
-@csrf_exempt
+@require_POST
 def eliminar_item(request):
-    if request.method == "POST":
-        item_id = request.POST.get("item_id")
-        try:
-            item = ItemCarrito.objects.get(id=item_id)
-            item.delete()
-            return JsonResponse({"success": True})
-        except ItemCarrito.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Item no encontrado"})
-    return JsonResponse({"success": False, "error": "Método inválido"})
+    carrito = obtener_carrito(request)
+    item_id = request.POST.get("item_id")
+    try:
+        item = ItemCarrito.objects.get(id=item_id, carrito=carrito)
+        item.delete()
+        return JsonResponse({"success": True})
+    except ItemCarrito.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Item no encontrado"})
 
 
-@csrf_exempt
+@require_POST
 def actualizar_cantidad(request):
-    if request.method == "POST":
-        item_id = request.POST.get("item_id")
+    carrito = obtener_carrito(request)
+    item_id = request.POST.get("item_id")
+
+    try:
         nueva_cantidad = int(request.POST.get("cantidad", 1))
-        try:
-            item = ItemCarrito.objects.get(id=item_id)
-            item.cantidad = nueva_cantidad
-            item.save()
-            return JsonResponse({"success": True, "subtotal": item.subtotal()})
-        except ItemCarrito.DoesNotExist:
-            return JsonResponse({"success": False, "error": "Item no encontrado"})
-    return JsonResponse({"success": False, "error": "Método inválido"})
+    except (TypeError, ValueError):
+        return JsonResponse({"success": False, "error": "Cantidad inválida"})
+
+    if nueva_cantidad < 1:
+        nueva_cantidad = 1
+
+    try:
+        item = ItemCarrito.objects.select_related('producto').get(id=item_id, carrito=carrito)
+        if item.producto.stock > 0 and nueva_cantidad > item.producto.stock:
+            nueva_cantidad = item.producto.stock
+        item.cantidad = nueva_cantidad
+        item.save()
+        return JsonResponse({"success": True, "subtotal": item.subtotal()})
+    except ItemCarrito.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Item no encontrado"})
 
 
 def checkout(request):
@@ -206,11 +241,17 @@ def checkout(request):
         if not direccion or not comuna:
             messages.error(request, "Por favor completa todos los campos de envío")
             return render(request, "principal/checkout.html", {
-                "items": items, 
+                "items": items,
                 "total": total
             })
-        
-        # Crear orden de compra
+
+        sin_stock = [item for item in items if item.cantidad > item.producto.stock]
+        if sin_stock:
+            nombres = ", ".join(item.producto.nombre for item in sin_stock)
+            messages.error(request, f"No hay stock suficiente para: {nombres}")
+            return redirect('ver_carrito')
+
+        # Crear orden de compra y guardar una copia fija de los items comprados
         orden = OrdenCompra.objects.create(
             usuario=request.user,
             carrito=carrito,
@@ -219,55 +260,57 @@ def checkout(request):
             comuna=comuna,
             estado='pendiente'
         )
-        
+        for item in items:
+            DetalleOrdenCompra.objects.create(
+                orden=orden,
+                producto=item.producto,
+                nombre_producto=item.producto.nombre,
+                cantidad=item.cantidad,
+                precio_unitario=item.producto.precio,
+            )
+
         # Crear transacción en Transbank
-        buy_order = f"orden_{orden.id}"
+        buy_order = f"orden_{orden.id}_{uuid.uuid4().hex[:8]}"
         session_id = request.session.session_key or str(request.user.id)
         return_url = request.build_absolute_uri('/webpay/return/')
-        
+
         try:
             response = tx.create(buy_order, session_id, float(total), return_url)
-            
+
             # Guardar token en la orden
             orden.token_transbank = response['token']
             orden.save()
-            
+
             # Redirigir a Transbank
             return render(request, "principal/redirect_webpay.html", {
                 'token': response['token'],
                 'url': response['url']
             })
-            
+
         except Exception as e:
             orden.estado = 'fallido'
             orden.save()
             messages.error(request, f"Error al procesar el pago: {str(e)}")
             return redirect("ver_carrito")
-    
+
     # GET request - mostrar formulario de checkout
     return render(request, "principal/checkout.html", {
-        "items": items, 
+        "items": items,
         "total": total
     })
 
 
 def agregar_al_carrito(request, producto_id):
     producto = get_object_or_404(Producto, id=producto_id)
+    carrito = obtener_carrito(request)
 
-    # Buscar carrito
-    if request.user.is_authenticated:
-        carrito, _ = Carrito.objects.get_or_create(usuario=request.user)
-    else:
-        # Carrito anónimo -> opcional manejar por sesión
-        carrito, _ = Carrito.objects.get_or_create(usuario=None)
-
-    # Agregar producto o aumentar cantidad
+    # Agregar producto o aumentar cantidad, sin superar el stock disponible
     item, creado = ItemCarrito.objects.get_or_create(carrito=carrito, producto=producto)
-    if not creado:
+    if not creado and item.cantidad < producto.stock:
         item.cantidad += 1
     item.save()
 
-    # 🔹 Si la petición viene de fetch (AJAX), devolvemos JSON
+    # Si la petición viene de fetch (AJAX), devolvemos JSON
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         return JsonResponse({"success": True, "mensaje": f"{producto.nombre} agregado al carrito"})
 
@@ -291,9 +334,9 @@ def agregar_wishlist(request, producto_id):
     item, creado = ItemWishlist.objects.get_or_create(wishlist=wishlist, producto=producto)
 
     if creado:
-        return JsonResponse({"success": True, "mensaje": f"✅ {producto.nombre} se agregó a tu wishlist."})
+        return JsonResponse({"success": True, "mensaje": f"{producto.nombre} se agregó a tu wishlist."})
     else:
-        return JsonResponse({"success": False, "mensaje": f"⚠️ {producto.nombre} ya está en tu wishlist."})
+        return JsonResponse({"success": False, "mensaje": f"{producto.nombre} ya está en tu wishlist."})
 
 def ver_wishlist(request):
     if not request.user.is_authenticated:
@@ -383,65 +426,8 @@ environment = settings.TRANSBANK['ENVIRONMENT']
 
 tx = Transaction(WebpayOptions(commerce_code, api_key, environment))
 
-def checkout(request):
-    if request.method == "POST":
-        direccion = request.POST.get("direccion")
-        comuna = request.POST.get("comuna")
-        
-        carrito = obtener_carrito(request)
-        items = carrito.items.all()
-        total = sum(item.subtotal() for item in items)
-        
-        if total == 0:
-            messages.error(request, "El carrito está vacío")
-            return redirect("ver_carrito")
-        
-        # Crear orden de compra
-        orden = OrdenCompra.objects.create(
-            usuario=request.user if request.user.is_authenticated else None,
-            carrito=carrito,
-            total=total,
-            direccion=direccion,
-            comuna=comuna,
-            estado='pendiente'
-        )
-        
-        # Crear transacción en Transbank
-        buy_order = f"orden_{orden.id}_{uuid.uuid4().hex[:8]}"
-        session_id = request.session.session_key or str(request.user.id) if request.user.is_authenticated else str(uuid.uuid4())
-        return_url = request.build_absolute_uri('/webpay/return/')
-        
-        try:
-            response = tx.create(buy_order, session_id, float(total), return_url)
-            
-            # Guardar token en la orden
-            orden.token_transbank = response['token']
-            orden.save()
-            
-            # Redirigir a Transbank
-            return render(request, "principal/redirect_webpay.html", {
-                'token': response['token'],
-                'url': response['url']
-            })
-            
-        except Exception as e:
-            orden.estado = 'fallido'
-            orden.save()
-            messages.error(request, f"Error al crear transacción: {str(e)}")
-            return redirect("ver_carrito")
-    
-    # GET request - mostrar formulario de checkout
-    carrito = obtener_carrito(request)
-    items = carrito.items.all()
-    total = sum(item.subtotal() for item in items)
-    
-    return render(request, "principal/checkout.html", {
-        "items": items, 
-        "total": total
-    })
 
-
-#modificacion 
+#modificacion
 def webpay_return(request):
     token = request.GET.get('token_ws')
     
@@ -463,15 +449,18 @@ def webpay_return(request):
             # Pago exitoso
             orden.estado = 'pagado'
             orden.save()
-            
-            # 🔹 ENVIAR BOLETA POR EMAIL
+
+            # Descontar stock según lo efectivamente comprado
+            for detalle in orden.detalles.select_related('producto'):
+                if detalle.producto:
+                    Producto.objects.filter(pk=detalle.producto_id).update(
+                        stock=F('stock') - detalle.cantidad
+                    )
+
+            # Enviar boleta por email
             if orden.usuario and orden.usuario.email:
-                exito_email = enviar_boleta_email(orden)
-                if exito_email:
-                    print("✅ Boleta enviada por email correctamente")
-                else:
-                    print("❌ Error al enviar la boleta por email")
-            
+                enviar_boleta_email(orden)
+
             # Vaciar carrito
             orden.carrito.items.all().delete()
             
@@ -506,15 +495,50 @@ def webpay_failure(request):
 # Contacto
 def contacto(request):
     if request.method == 'POST':
-        nombre = request.POST.get('nombre')
-        email = request.POST.get('email')
-        mensaje = request.POST.get('mensaje')
-        
-        # Aquí puedes procesar el mensaje (guardar en BD, enviar email, etc.)
-        print(f"Mensaje de {nombre} ({email}): {mensaje}")
-        
-        # Por ahora solo redirigimos con un mensaje de éxito
-        messages.success(request, "¡Mensaje enviado correctamente! Te contactaremos pronto.")
+        nombre = request.POST.get('nombre', '').strip()
+        email = request.POST.get('email', '').strip()
+        mensaje = request.POST.get('mensaje', '').strip()
+        es_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
+
+        if not nombre or not email or not mensaje:
+            error = "Por favor completa todos los campos."
+            if es_ajax:
+                return JsonResponse({"success": False, "error": error})
+            messages.error(request, error)
+            return redirect('contacto')
+
+        try:
+            send_mail(
+                subject=f"Nuevo mensaje de contacto - {nombre}",
+                message=f"Nombre: {nombre}\nEmail: {email}\n\nMensaje:\n{mensaje}",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[settings.DEFAULT_FROM_EMAIL],
+                fail_silently=False,
+            )
+            enviado = True
+        except Exception:
+            enviado = False
+
+        if es_ajax:
+            return JsonResponse({"success": enviado})
+
+        if enviado:
+            messages.success(request, "¡Mensaje enviado correctamente! Te contactaremos pronto.")
+        else:
+            messages.error(request, "No se pudo enviar tu mensaje. Intenta nuevamente.")
         return redirect('contacto')
-    
+
     return render(request, 'principal/contacto.html')
+
+
+def robots_txt(request):
+    lineas = [
+        "User-agent: *",
+        "Allow: /",
+        "Disallow: /admin/",
+        "Disallow: /inventario/",
+        "Disallow: /carrito/",
+        "Disallow: /checkout/",
+        f"Sitemap: {request.build_absolute_uri('/sitemap.xml')}",
+    ]
+    return HttpResponse("\n".join(lineas), content_type="text/plain")

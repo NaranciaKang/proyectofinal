@@ -8,6 +8,7 @@ class Producto(models.Model):
     precio = models.DecimalField(max_digits=10, decimal_places=2)
     foto = models.ImageField(upload_to='productos/', blank=True, null=True)
     categoria = models.CharField(max_length=1, choices=CATEGORIAS, default='H')
+    stock = models.PositiveIntegerField(default=100)
 
     def __str__(self):
         return f"{self.nombre} ({self.get_categoria_display()})"
@@ -70,3 +71,19 @@ class OrdenCompra(models.Model):
 
     def __str__(self):
         return f"Orden {self.id} - {self.usuario.username}"
+
+
+class DetalleOrdenCompra(models.Model):
+    """Copia fija de los productos comprados al momento del checkout,
+    para que la boleta no dependa del estado actual del carrito."""
+    orden = models.ForeignKey(OrdenCompra, on_delete=models.CASCADE, related_name="detalles")
+    producto = models.ForeignKey(Producto, on_delete=models.SET_NULL, null=True)
+    nombre_producto = models.CharField(max_length=120)
+    cantidad = models.PositiveIntegerField()
+    precio_unitario = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def subtotal(self):
+        return self.cantidad * self.precio_unitario
+
+    def __str__(self):
+        return f"{self.cantidad} x {self.nombre_producto} (orden {self.orden_id})"

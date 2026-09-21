@@ -81,6 +81,12 @@
             <p class="wishlist-count">{{ items|length }} productos en favoritos</p>
         </div>
 
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
         <div class="wishlist-grid">
             {% for item in items %}
             <div class="wishlist-card">
