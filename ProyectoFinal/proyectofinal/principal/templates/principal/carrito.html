@@ -81,7 +81,13 @@ Envío gratuito en todos los pedidos
             <h2>Tu Carrito de Compras</h2>
             <span class="contador-productos">{{ items|length }} producto{{ items|length|pluralize }}</span>
         </div>
-        
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
         <div class="lista-productos">
             {% for item in items %}
             <div class="producto-card">

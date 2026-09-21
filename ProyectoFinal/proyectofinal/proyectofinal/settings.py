@@ -133,6 +133,12 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Alinea los tags de messages con las clases de Bootstrap (alert-danger, no alert-error)
+from django.contrib.messages import constants as message_constants
+MESSAGE_TAGS = {
+    message_constants.ERROR: 'danger',
+}
+
 
 
 # Configuración de Gmail para enviar correos
